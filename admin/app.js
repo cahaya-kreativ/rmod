@@ -312,62 +312,130 @@ function calculateAdminStats() {
 
 function checkEmergencyAlertStatus() {
   const banner = document.getElementById('admin-emergency-banner');
-  const desc = document.getElementById('emergency-alert-desc');
-  const emergencyType = document.getElementById('admin-emergency-type');
-  const emergencyReport = document.getElementById('admin-emergency-report');
-  const emergencyPhotoBox = document.getElementById('admin-emergency-photo-box');
-  const emergencyPhoto = document.getElementById('admin-emergency-photo');
+  if (!banner) return;
   
-  if (state.emergency && state.emergency.active) {
-    if (desc) desc.innerText = `Warga: ${state.emergency.nama} | Rumah: ${state.emergency.rumah} | Pukul: ${state.emergency.timestamp}`;
-    if (emergencyType) emergencyType.innerText = state.emergency.jenis || 'Medis / Sakit Parah';
-    if (emergencyReport) emergencyReport.innerText = state.emergency.laporan || 'Membutuhkan bantuan segera!';
+  // Derive active emergencies from emergencyLogs (source of truth)
+  // This supports multiple simultaneous panic alerts from different warga
+  if (!state.emergencyLogs) state.emergencyLogs = [];
+  const activeEmergencies = state.emergencyLogs.filter(l => l.status === "Menunggu Tindakan");
+  
+  if (activeEmergencies.length > 0) {
+    // Build emergency cards for each active emergency
+    let emergencyCardsHTML = '';
+    activeEmergencies.forEach(em => {
+      let photoHTML = '';
+      if (em.foto) {
+        photoHTML = `
+          <div style="margin-top:0.75rem;">
+            <strong>📸 Lampiran Foto:</strong><br>
+            <img src="${em.foto}" style="max-width:100%; max-height:180px; border-radius:var(--radius-sm); border:2px solid white; margin-top:0.5rem; cursor:zoom-in;" onclick="window.open(this.src, '_blank')">
+          </div>`;
+      }
+      
+      emergencyCardsHTML += `
+        <div style="background-color: rgba(0,0,0,0.2); padding: 1rem; border-radius: var(--radius-md); font-size: 0.95rem; color: white; border: 1px solid rgba(255,255,255,0.15); margin-top: 0.75rem;">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:0.35rem;">
+            <strong style="font-size:1.05rem;">🚨 ${em.namaWarga} — Rumah: ${em.rumah}</strong>
+            <span style="font-size:0.85rem; opacity:0.8;">Pukul ${em.waktu} WIB | ${em.tanggal}</span>
+          </div>
+          <div><strong>Kategori:</strong> <span style="font-weight:700; color:#fef08a;">${em.jenis || 'Medis / Sakit Parah'}</span></div>
+          <div style="margin-top:0.25rem;"><strong>Laporan:</strong> ${em.laporan || 'Membutuhkan bantuan segera!'}</div>
+          ${photoHTML}
+          <div style="margin-top:0.75rem;">
+            <button class="btn btn-primary" onclick="handleSingleEmergency('${em.id}')" style="min-height:36px; padding:0.25rem 0.75rem; font-size:0.85rem; background-color:white; color:var(--danger); border:2px solid white; font-weight:700;">
+              <i data-lucide="check-circle-2"></i> Tandai Selesai
+            </button>
+          </div>
+        </div>`;
+    });
     
-    if (state.emergency.foto) {
-      if (emergencyPhoto) emergencyPhoto.src = state.emergency.foto;
-      if (emergencyPhotoBox) emergencyPhotoBox.style.display = 'block';
-    } else {
-      if (emergencyPhotoBox) emergencyPhotoBox.style.display = 'none';
-    }
+    const titleText = activeEmergencies.length === 1
+      ? 'DARURAT: PANGGILAN BANTUAN AKTIF!'
+      : `DARURAT: ${activeEmergencies.length} PANGGILAN BANTUAN AKTIF!`;
     
-    if (banner) banner.style.display = 'block';
+    const descText = activeEmergencies.length === 1
+      ? `Warga: ${activeEmergencies[0].namaWarga} | Rumah: ${activeEmergencies[0].rumah} | Pukul: ${activeEmergencies[0].waktu}`
+      : `${activeEmergencies.length} warga membutuhkan bantuan mendesak secara bersamaan!`;
+    
+    banner.innerHTML = `
+      <div class="emergency-alert-bar" style="flex-direction: column; align-items: stretch; gap: 1rem; border-radius: var(--radius-lg); background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);">
+        <div class="emergency-alert-info">
+          <div class="emergency-alert-icon">⚠️</div>
+          <div class="emergency-alert-text">
+            <h3 style="margin: 0; font-size: 1.3rem; font-weight: 800;">${titleText}</h3>
+            <p style="margin: 5px 0 0 0; font-size: 0.95rem; line-height: 1.4; color: #fee2e2;">${descText}</p>
+          </div>
+        </div>
+        
+        ${emergencyCardsHTML}
+        
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+          <button class="btn btn-secondary" onclick="stopSiren()" style="flex: 1; min-height: 48px; border: 2px solid white; background-color: transparent; color: white; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+            <i data-lucide="volume-x"></i> Senyapkan Sirine
+          </button>
+          <button class="btn btn-primary" onclick="clearAllEmergencies()" style="flex: 1.5; background-color: white; color: var(--danger); font-weight: 800; min-height: 48px; border: 2px solid white; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+            <i data-lucide="check-circle-2"></i> TANGGAPI SEMUA & SELESAI
+          </button>
+        </div>
+      </div>`;
+    
+    banner.style.display = 'block';
     
     // Play audio siren automatically
     if (!isSirenPlaying) {
       playSiren();
     }
+    
+    lucide.createIcons();
   } else {
-    if (banner) banner.style.display = 'none';
+    banner.innerHTML = '';
+    banner.style.display = 'none';
     stopSiren();
   }
 }
 
-function setupEmergencyHandler() {
-  const clearBtn = document.getElementById('admin-clear-emergency-btn');
-  if (clearBtn) {
-    clearBtn.addEventListener('click', () => {
-      if (confirm("Nyatakan situasi darurat selesai ditangani dan nonaktifkan alarm?")) {
-        // Change status in logs
-        if (state.emergencyLogs && state.emergencyLogs.length > 0) {
-          const activeLog = state.emergencyLogs.find(l => l.nik === state.emergency.nik && l.status === "Menunggu Tindakan");
-          if (activeLog) {
-            activeLog.status = "Telah Ditanggapi";
-          }
-        }
-        
-        state.emergency = { active: false };
-        saveState();
-        checkEmergencyAlertStatus();
-        renderAdminPanicLogsTable();
-        showToast("Situasi darurat dinyatakan AMAN dan alarm dimatikan.", "success");
+// Handle a single emergency from the banner
+function handleSingleEmergency(logId) {
+  if (confirm("Apakah situasi darurat ini sudah selesai ditangani dengan aman?")) {
+    const log = state.emergencyLogs.find(l => l.id === logId);
+    if (log) {
+      log.status = "Telah Ditanggapi";
+    }
+    
+    // If no more active emergencies, disable the global flag
+    const remaining = state.emergencyLogs.filter(l => l.status === "Menunggu Tindakan");
+    if (remaining.length === 0) {
+      state.emergency = { active: false };
+    }
+    
+    saveState();
+    checkEmergencyAlertStatus();
+    renderAdminPanicLogsTable();
+    showToast("Situasi darurat berhasil ditangani.", "success");
+  }
+}
+
+// Clear ALL active emergencies at once
+function clearAllEmergencies() {
+  if (confirm("Nyatakan SEMUA situasi darurat selesai ditangani dan nonaktifkan alarm?")) {
+    state.emergencyLogs.forEach(l => {
+      if (l.status === "Menunggu Tindakan") {
+        l.status = "Telah Ditanggapi";
       }
     });
+    
+    state.emergency = { active: false };
+    saveState();
+    checkEmergencyAlertStatus();
+    renderAdminPanicLogsTable();
+    showToast("Semua situasi darurat dinyatakan AMAN dan alarm dimatikan.", "success");
   }
-  
-  const muteBtn = document.getElementById('admin-mute-siren-btn');
-  if (muteBtn) {
-    muteBtn.addEventListener('click', stopSiren);
-  }
+}
+
+// Buttons are now dynamically rendered inside the banner, no static event listeners needed
+function setupEmergencyHandler() {
+  // No-op: emergency buttons are now rendered dynamically in checkEmergencyAlertStatus()
+  // and use onclick handlers directly (handleSingleEmergency, clearAllEmergencies, stopSiren)
 }
 
 function playSiren() {
@@ -967,8 +1035,9 @@ function markPanicHandled(id) {
     if (log) {
       log.status = "Telah Ditanggapi";
       
-      // If this was the active emergency, disable it
-      if (state.emergency && state.emergency.active && state.emergency.nik === log.nik) {
+      // If no more active emergencies remain, disable the global flag
+      const remaining = state.emergencyLogs.filter(l => l.status === "Menunggu Tindakan");
+      if (remaining.length === 0) {
         state.emergency = { active: false };
       }
       
@@ -992,15 +1061,12 @@ function resetDemoData() {
 // --- REAL-TIME INTER-TAB STORAGE EVENT SYNC LOOP ---
 setInterval(() => {
   const oldStateStr = JSON.stringify(state);
-  const oldActive = state.emergency ? state.emergency.active : false;
   const savedState = localStorage.getItem('rmod_state');
   if (savedState) {
     try {
       const parsed = JSON.parse(savedState);
       
-      const parsedEmergency = parsed.emergency || { active: false, nik: null, nama: null, rumah: null, timestamp: null, jenis: null, laporan: null, foto: null };
-      
-      state.emergency = parsedEmergency;
+      if (parsed.emergency) state.emergency = parsed.emergency;
       if (parsed.iuran) state.iuran = parsed.iuran;
       if (parsed.warga) state.warga = parsed.warga;
       if (parsed.surat) state.surat = parsed.surat;
@@ -1011,10 +1077,6 @@ setInterval(() => {
       
       const newStateStr = JSON.stringify(state);
       
-      if (state.emergency.active !== oldActive) {
-        checkEmergencyAlertStatus();
-      }
-      
       if (oldStateStr !== newStateStr && currentUser) {
         calculateAdminStats();
         renderAdminWargaTable();
@@ -1023,6 +1085,7 @@ setInterval(() => {
         renderCashLogsList('admin-cash-logs');
         renderAdminAppointmentsTable();
         renderAdminPanicLogsTable();
+        checkEmergencyAlertStatus();
         setTimeout(initChartJS, 50);
       }
     } catch (e) {
@@ -1037,11 +1100,8 @@ window.addEventListener('storage', (e) => {
     if (savedState) {
       try {
         const parsed = JSON.parse(savedState);
-        const oldActive = state.emergency ? state.emergency.active : false;
         
-        const parsedEmergency = parsed.emergency || { active: false, nik: null, nama: null, rumah: null, timestamp: null, jenis: null, laporan: null, foto: null };
-        
-        state.emergency = parsedEmergency;
+        if (parsed.emergency) state.emergency = parsed.emergency;
         if (parsed.iuran) state.iuran = parsed.iuran;
         if (parsed.warga) state.warga = parsed.warga;
         if (parsed.surat) state.surat = parsed.surat;
@@ -1049,10 +1109,6 @@ window.addEventListener('storage', (e) => {
         if (parsed.template) state.template = parsed.template;
         if (parsed.appointments) state.appointments = parsed.appointments;
         if (parsed.emergencyLogs) state.emergencyLogs = parsed.emergencyLogs;
-        
-        if (state.emergency.active !== oldActive) {
-          checkEmergencyAlertStatus();
-        }
         
         if (currentUser) {
           calculateAdminStats();
@@ -1062,6 +1118,7 @@ window.addEventListener('storage', (e) => {
           renderCashLogsList('admin-cash-logs');
           renderAdminAppointmentsTable();
           renderAdminPanicLogsTable();
+          checkEmergencyAlertStatus();
           setTimeout(initChartJS, 50);
         }
       } catch (err) {}

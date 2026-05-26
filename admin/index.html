@@ -84,38 +84,8 @@
     <!-- SPA VIEW 2: DASBOR PENGURUS (RT/RW Admin Area) -->
     <main class="dashboard-wrapper" id="view-admin" style="display: none;">
       
-      <!-- REAL-TIME PANIC ALERT AREA -->
-      <div id="admin-emergency-banner" style="display: none;">
-        <div class="emergency-alert-bar" style="flex-direction: column; align-items: stretch; gap: 1rem; border-radius: var(--radius-lg); background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);">
-          <div class="emergency-alert-info">
-            <div class="emergency-alert-icon">⚠️</div>
-            <div class="emergency-alert-text">
-              <h3 id="emergency-alert-title" style="margin: 0; font-size: 1.3rem; font-weight: 800;">DARURAT: PANGGILAN BANTUAN AKTIF!</h3>
-              <p id="emergency-alert-desc" style="margin: 5px 0 0 0; font-size: 0.95rem; line-height: 1.4; color: #fee2e2;"></p>
-            </div>
-          </div>
-          
-          <!-- Detailed Emergency Report from Resident -->
-          <div id="admin-emergency-details" style="background-color: rgba(0, 0, 0, 0.2); padding: 1rem; border-radius: var(--radius-md); font-size: 0.95rem; color: white; border: 1px solid rgba(255, 255, 255, 0.15);">
-            <div><strong>🚨 Kategori Bahaya:</strong> <span id="admin-emergency-type" style="font-weight: 700; color: #fef08a;">-</span></div>
-            <div style="margin-top:0.35rem;"><strong>📝 Laporan Kejadian:</strong> <span id="admin-emergency-report" style="font-weight: 500;">-</span></div>
-            <div id="admin-emergency-photo-box" style="margin-top:0.75rem; display:none;">
-              <strong>📸 Lampiran Foto Kejadian:</strong><br>
-              <img id="admin-emergency-photo" src="" style="max-width:100%; max-height:220px; border-radius:var(--radius-sm); border:2px solid white; margin-top:0.5rem; cursor:zoom-in;" onclick="window.open(this.src, '_blank')">
-            </div>
-          </div>
-
-          <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-            <!-- MUTE BUTTON -->
-            <button class="btn btn-secondary" id="admin-mute-siren-btn" style="flex: 1; min-height: 48px; border: 2px solid white; background-color: transparent; color: white; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
-              <i data-lucide="volume-x"></i> Senyapkan Sirine (5s)
-            </button>
-            <button class="btn btn-primary" id="admin-clear-emergency-btn" style="flex: 1.5; background-color: white; color: var(--danger); font-weight: 800; min-height: 48px; border: 2px solid white; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
-              <i data-lucide="check-circle-2"></i> TANGGAPI DARURAT & SELESAI
-            </button>
-          </div>
-        </div>
-      </div>
+      <!-- REAL-TIME PANIC ALERT AREA (Dynamically rendered in app.js to support multiple simultaneous emergencies) -->
+      <div id="admin-emergency-banner" style="display: none;"></div>
 
       <!-- Quick Stats Hub -->
       <div class="stats-grid">
