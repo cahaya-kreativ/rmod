@@ -33,6 +33,9 @@ const DEFAULT_STATE = {
     { id: "k-05", tipe: "in", deskripsi: "Akumulasi Pembayaran Iuran Warga April 2026", nominal: 1600000, tanggal: "2026-04-30" },
     { id: "k-06", tipe: "out", deskripsi: "Honor Bulanan Petugas Keamanan Sipil (Satpam RT)", nominal: 1400000, tanggal: "2026-05-01" }
   ],
+  appointments: [],
+  emergencyLogs: [],
+  pengumuman: [],
   emergency: {
     active: false,
     nik: null,
@@ -48,13 +51,7 @@ const DEFAULT_STATE = {
     subKop: "KELURAHAN BARU, KECAMATAN BOGOR UTARA",
     kontak: "Sekretariat: Jl. Gang Cempaka No. 12B, Bogor. Telp: 081234567890",
     penutup: "Demikian Surat Pengantar ini dibuat dengan sebenar-benarnya untuk dipergunakan sebagai persyaratan pengurusan dokumen yang bersangkutan."
-  },
-  appointments: [
-    { id: "a-01", nik: "3201010101", namaWarga: "Budi Santoso", target: "Ketua RT", tanggal: "2026-05-28", waktu: "19:30", keperluan: "Tanda Tangan Basah - Minta ttd basah di dokumen waris fisik", status: "Diproses", catatan: "" }
-  ],
-  emergencyLogs: [
-    { id: "e-01", nik: "3201010102", namaWarga: "Siti Aminah", rumah: "No. 08, RT 03/RW 04", tanggal: "2026-05-25", waktu: "08:15:30", jenis: "Medis / Sakit Parah", laporan: "Mengalami sesak nafas parah, butuh ambulans segera.", foto: null, status: "Telah Ditanggapi" }
-  ]
+  }
 };
 
 // --- APP STATE & MEMORY CONTEXT ---
@@ -116,6 +113,10 @@ function initApp() {
     state.emergencyLogs = JSON.parse(JSON.stringify(DEFAULT_STATE.emergencyLogs));
     needsSave = true;
   }
+  if (!state.pengumuman || !Array.isArray(state.pengumuman)) {
+    state.pengumuman = JSON.parse(JSON.stringify(DEFAULT_STATE.pengumuman));
+    needsSave = true;
+  }
   if (!state.emergency) {
     state.emergency = JSON.parse(JSON.stringify(DEFAULT_STATE.emergency));
     needsSave = true;
@@ -129,23 +130,26 @@ function initApp() {
   // Restore session if exists
   const savedSession = localStorage.getItem('rmod_session');
   if (savedSession) {
+    let sessionData = null;
     try {
-      const sessionData = JSON.parse(savedSession);
-      if (sessionData && sessionData.role === 'warga') {
-        const checkWarga = state.warga.find(w => w.nik === sessionData.data.nik);
-        if (checkWarga) {
-          currentUser = { role: 'warga', data: checkWarga };
-          localStorage.setItem('rmod_session', JSON.stringify(currentUser));
-          loadDashboard();
-        } else {
-          localStorage.removeItem('rmod_session');
-          showLoginScreen();
-        }
+      sessionData = JSON.parse(savedSession);
+    } catch (err) {
+      localStorage.removeItem('rmod_session');
+      showLoginScreen();
+      return;
+    }
+    
+    if (sessionData && sessionData.role === 'warga') {
+      const checkWarga = state.warga.find(w => w.nik === sessionData.data.nik);
+      if (checkWarga) {
+        currentUser = { role: 'warga', data: checkWarga };
+        localStorage.setItem('rmod_session', JSON.stringify(currentUser));
+        loadDashboard();
       } else {
         localStorage.removeItem('rmod_session');
         showLoginScreen();
       }
-    } catch (err) {
+    } else {
       localStorage.removeItem('rmod_session');
       showLoginScreen();
     }
@@ -285,8 +289,52 @@ function renderWargaPortal() {
   renderCashLogsList('warga-cash-logs');
   renderWargaLettersTable();
   renderWargaAppointmentsTable();
+  renderWargaPengumuman();
   
+  resetWargaPanicButtonUI();
   lucide.createIcons();
+}
+
+function renderWargaPengumuman() {
+  const container = document.getElementById('warga-pengumuman-feed');
+  if (!container) return;
+  
+  if (!state.pengumuman || state.pengumuman.length === 0) {
+    container.innerHTML = `
+      <div class="card" style="background-color: var(--primary-light); border-color: rgba(37, 99, 235, 0.2); padding: 1.25rem; display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;">
+        <i data-lucide="megaphone" style="color: var(--primary); width: 32px; height: 32px; flex-shrink: 0;"></i>
+        <div>
+          <h4 style="color: var(--primary); font-size: 1.1rem; font-weight: 700;">Informasi RT/RW</h4>
+          <p style="color: var(--text-secondary); font-size: 0.95rem;">Selamat datang di portal layanan mandiri R-MOD. Belum ada pengumuman terbaru dari pengurus RT/RW.</p>
+        </div>
+      </div>
+    `;
+    return;
+  }
+  
+  // Sort by latest first
+  const sorted = [...state.pengumuman].sort((a, b) => b.id - a.id);
+  
+  let html = '';
+  sorted.forEach(p => {
+    let imgHtml = '';
+    if (p.foto) {
+      imgHtml = `<div style="margin-top: 1rem;"><img src="${p.foto}" style="max-width: 100%; max-height: 300px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);"></div>`;
+    }
+    
+    html += `
+      <div class="card" style="background-color: #fff; border-left: 4px solid var(--primary); padding: 1.25rem; margin-bottom: 1.5rem; position: relative;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+          <h4 style="color: var(--primary); font-size: 1.15rem; font-weight: 700; margin: 0;"><i data-lucide="bell" style="width:18px; height:18px; vertical-align:-2px; margin-right:4px;"></i> ${p.judul}</h4>
+          <span style="font-size: 0.8rem; color: var(--text-muted); background: var(--bg-alt); padding: 0.2rem 0.5rem; border-radius: 10px;">${p.tanggal}</span>
+        </div>
+        <p style="color: var(--text-primary); font-size: 0.95rem; white-space: pre-wrap; line-height: 1.5; margin: 0;">${p.isi}</p>
+        ${imgHtml}
+      </div>
+    `;
+  });
+  
+  container.innerHTML = html;
 }
 
 function switchWargaTab(tab) {
@@ -334,17 +382,32 @@ function calculateWargaCashStats() {
   });
   document.getElementById('warga-total-kas').innerText = formatRupiah(totalKas);
   
-  // Kas masuk bulan ini
+  // Kas masuk dan keluar bulan ini
   let kasMasuk = 0;
+  let kasKeluar = 0;
   const currentMonth = new Date().getMonth(); // 0-11
   const currentYear = new Date().getFullYear();
+  
   state.kas.forEach(k => {
-    const kDate = new Date(k.tanggal);
-    if (k.tipe === 'in' && kDate.getMonth() === currentMonth && kDate.getFullYear() === currentYear) {
-      kasMasuk += k.nominal;
+    if (k.tanggal) {
+      // Assuming tanggal format is "YYYY-MM-DD"
+      const dateParts = k.tanggal.split('-');
+      if (dateParts.length >= 2) {
+        if (parseInt(dateParts[0]) === currentYear && parseInt(dateParts[1]) - 1 === currentMonth) {
+          if (k.tipe === 'in') {
+            kasMasuk += k.nominal;
+          } else {
+            kasKeluar += k.nominal;
+          }
+        }
+      }
     }
   });
   document.getElementById('warga-kas-masuk').innerText = "+" + formatRupiah(kasMasuk);
+  const elKasKeluar = document.getElementById('warga-kas-keluar');
+  if (elKasKeluar) {
+    elKasKeluar.innerText = "-" + formatRupiah(kasKeluar);
+  }
 }
 
 function renderWargaIuranTable() {
@@ -388,15 +451,21 @@ function renderWargaIuranTable() {
 
 function renderCashLogsList(containerId) {
   const container = document.getElementById(containerId);
+  if (!container) return;
   container.innerHTML = '';
   
-  const sorted = [...state.kas].sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
-  const slice = sorted.slice(0, 5); // show last 5
+  // Sort descending
+  const sorted = [...state.kas].sort((a, b) => b.id.localeCompare(a.id));
   
-  slice.forEach(log => {
+  if (sorted.length === 0) {
+    container.innerHTML = `<div style="text-align:center; padding:2rem; color:var(--text-secondary);">Belum ada catatan kas RT.</div>`;
+    return;
+  }
+  
+  sorted.forEach(log => {
     const isIncome = log.tipe === 'in';
-    const amountFormatted = (isIncome ? "+" : "-") + formatRupiah(log.nominal);
-    const badgeClass = isIncome ? 'income' : 'expense';
+    const amountFormatted = (isIncome ? '+' : '-') + formatRupiah(log.nominal);
+    const badgeClass = isIncome ? 'in' : 'out';
     const icon = isIncome ? 'arrow-down-left' : 'arrow-up-right';
     
     container.innerHTML += `
@@ -1088,6 +1157,7 @@ setInterval(() => {
       if (parsed.appointments) state.appointments = parsed.appointments;
       if (parsed.emergencyLogs) state.emergencyLogs = parsed.emergencyLogs;
       if (parsed.emergency) state.emergency = parsed.emergency;
+      if (parsed.pengumuman) state.pengumuman = parsed.pengumuman;
       
       const newStateStr = JSON.stringify(state);
       
@@ -1115,6 +1185,7 @@ window.addEventListener('storage', (e) => {
         if (parsed.appointments) state.appointments = parsed.appointments;
         if (parsed.emergencyLogs) state.emergencyLogs = parsed.emergencyLogs;
         if (parsed.emergency) state.emergency = parsed.emergency;
+        if (parsed.pengumuman) state.pengumuman = parsed.pengumuman;
         
         if (currentUser) {
           renderWargaPortal();

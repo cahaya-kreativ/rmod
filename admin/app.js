@@ -33,6 +33,9 @@ const DEFAULT_STATE = {
     { id: "k-05", tipe: "in", deskripsi: "Akumulasi Pembayaran Iuran Warga April 2026", nominal: 1600000, tanggal: "2026-04-30" },
     { id: "k-06", tipe: "out", deskripsi: "Honor Bulanan Petugas Keamanan Sipil (Satpam RT)", nominal: 1400000, tanggal: "2026-05-01" }
   ],
+  appointments: [],
+  emergencyLogs: [],
+  pengumuman: [],
   emergency: {
     active: false,
     nik: null,
@@ -114,6 +117,10 @@ function initApp() {
     state.emergencyLogs = JSON.parse(JSON.stringify(DEFAULT_STATE.emergencyLogs));
     needsSave = true;
   }
+  if (!state.pengumuman || !Array.isArray(state.pengumuman)) {
+    state.pengumuman = JSON.parse(JSON.stringify(DEFAULT_STATE.pengumuman));
+    needsSave = true;
+  }
   if (!state.emergency) {
     state.emergency = JSON.parse(JSON.stringify(DEFAULT_STATE.emergency));
     needsSave = true;
@@ -127,16 +134,19 @@ function initApp() {
   // Restore session if exists
   const savedSession = localStorage.getItem('rmod_session');
   if (savedSession) {
+    let sessionData = null;
     try {
-      const sessionData = JSON.parse(savedSession);
-      if (sessionData && sessionData.role === 'admin') {
-        currentUser = { role: 'admin' };
-        loadDashboard();
-      } else {
-        localStorage.removeItem('rmod_session');
-        showLoginScreen();
-      }
+      sessionData = JSON.parse(savedSession);
     } catch (err) {
+      localStorage.removeItem('rmod_session');
+      showLoginScreen();
+      return;
+    }
+    
+    if (sessionData && sessionData.role === 'admin') {
+      currentUser = { role: 'admin' };
+      loadDashboard();
+    } else {
       localStorage.removeItem('rmod_session');
       showLoginScreen();
     }
@@ -148,6 +158,7 @@ function initApp() {
   setupCitizenHandler();
   setupTemplateHandler();
   setupEmergencyHandler();
+  setupPengumumanHandler();
   lucide.createIcons();
 }
 
@@ -257,6 +268,7 @@ function renderAdminPortal() {
   renderCashLogsList('admin-cash-logs');
   renderAdminAppointmentsTable();
   renderAdminPanicLogsTable();
+  renderAdminPengumuman();
   checkEmergencyAlertStatus();
   
   // Re-draw ChartJS doughnut visualization
@@ -268,7 +280,7 @@ function renderAdminPortal() {
 function switchAdminTab(tab) {
   currentAdminTab = tab;
   
-  const tabs = ['warga', 'surat', 'keuangan', 'template', 'janjian', 'panic'];
+  const tabs = ['warga', 'surat', 'keuangan', 'template', 'janjian', 'panic', 'pengumuman'];
   tabs.forEach(t => {
     const btn = document.getElementById(`tab-admin-${t}`);
     const cont = document.getElementById(`admin-tab-${t}-content`);
@@ -328,7 +340,7 @@ function checkEmergencyAlertStatus() {
         photoHTML = `
           <div style="margin-top:0.75rem;">
             <strong>📸 Lampiran Foto:</strong><br>
-            <img src="${em.foto}" style="max-width:100%; max-height:180px; border-radius:var(--radius-sm); border:2px solid white; margin-top:0.5rem; cursor:zoom-in;" onclick="window.open(this.src, '_blank')">
+            <img src="${em.foto}" style="max-width:100%; max-height:180px; border-radius:var(--radius-sm); border:2px solid white; margin-top:0.5rem; cursor:zoom-in;" onclick="const win = window.open(); win.document.write('<title>Foto Darurat</title><body style=\\'margin:0;display:flex;justify-content:center;align-items:center;background:#222;\\'><img src=\\'${em.foto}\\' style=\\'max-width:100%;max-height:100vh;\\'></body>');">
           </div>`;
       }
       
@@ -812,13 +824,18 @@ function renderCashLogsList(containerId) {
   if (!container) return;
   container.innerHTML = '';
   
-  const sorted = [...state.kas].sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
-  const slice = sorted.slice(0, 8); // show last 8 in admin
+  // Sort descending
+  const sorted = [...state.kas].sort((a, b) => b.id.localeCompare(a.id));
   
-  slice.forEach(log => {
+  if (sorted.length === 0) {
+    container.innerHTML = `<div style="text-align:center; padding:2rem; color:var(--text-secondary);">Belum ada catatan kas RT.</div>`;
+    return;
+  }
+  
+  sorted.forEach(log => {
     const isIncome = log.tipe === 'in';
-    const amountFormatted = (isIncome ? "+" : "-") + formatRupiah(log.nominal);
-    const badgeClass = isIncome ? 'income' : 'expense';
+    const amountFormatted = (isIncome ? '+' : '-') + formatRupiah(log.nominal);
+    const badgeClass = isIncome ? 'in' : 'out';
     const icon = isIncome ? 'arrow-down-left' : 'arrow-up-right';
     
     container.innerHTML += `
@@ -983,6 +1000,89 @@ function rejectAppointment(id) {
   }
 }
 
+// --- PENGUMUMAN CONTROLLER ---
+function renderAdminPengumuman() {
+  const container = document.getElementById('admin-pengumuman-list');
+  if (!container) return;
+  container.innerHTML = '';
+  
+  if (!state.pengumuman || state.pengumuman.length === 0) {
+    container.innerHTML = `<div style="text-align:center; padding:2rem; color:var(--text-secondary);">Belum ada pengumuman.</div>`;
+    return;
+  }
+  
+  const sorted = [...state.pengumuman].sort((a, b) => b.id - a.id);
+  
+  sorted.forEach(p => {
+    let imgHtml = '';
+    if (p.foto) {
+      imgHtml = `<div style="margin-top: 0.5rem;"><img src="${p.foto}" style="max-width: 100%; max-height: 150px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);"></div>`;
+    }
+    
+    container.innerHTML += `
+      <div style="background-color: #f8fafc; border: 1px solid rgba(37, 99, 235, 0.2); padding: 1rem; border-radius: var(--radius-md); margin-bottom: 1rem;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+          <strong style="color: var(--primary); font-size: 1.05rem;">${p.judul}</strong>
+          <span style="font-size: 0.8rem; color: var(--text-muted);">${p.tanggal}</span>
+        </div>
+        <p style="font-size: 0.9rem; margin-bottom: 0.5rem; white-space: pre-wrap;">${p.isi}</p>
+        ${imgHtml}
+        <div style="margin-top: 0.75rem; text-align: right;">
+          <button class="btn btn-secondary" onclick="deletePengumuman(${p.id})" style="padding: 0.2rem 0.6rem; font-size: 0.8rem; color: var(--danger); border-color: rgba(220, 38, 38, 0.2);"><i data-lucide="trash-2" style="width: 14px; height: 14px;"></i> Hapus</button>
+        </div>
+      </div>
+    `;
+  });
+  lucide.createIcons();
+}
+
+function setupPengumumanHandler() {
+  const form = document.getElementById('admin-add-pengumuman-form');
+  if (!form) return;
+  
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const judul = document.getElementById('pengumuman-judul').value.trim();
+    const isi = document.getElementById('pengumuman-isi').value.trim();
+    const photoImg = document.getElementById('pengumuman-photo-preview');
+    const foto = (photoImg && photoImg.style.display === 'block') ? photoImg.src : null;
+    
+    if (!state.pengumuman) state.pengumuman = [];
+    
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' }) + ' ' + now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+    
+    state.pengumuman.push({
+      id: Date.now(),
+      judul: judul,
+      isi: isi,
+      foto: foto,
+      tanggal: dateStr
+    });
+    
+    saveState();
+    form.reset();
+    if (photoImg) {
+      photoImg.style.display = 'none';
+      photoImg.src = '';
+    }
+    const label = document.getElementById('pengumuman-upload-label');
+    if (label) label.innerHTML = `<i data-lucide="camera" style="width:14px; height:14px; vertical-align:-2px; margin-right:3px;"></i> Lampirkan Foto (Opsional)`;
+    
+    renderAdminPengumuman();
+    showToast("Pengumuman berhasil ditambahkan dan disiarkan ke warga.", "success");
+  });
+}
+
+function deletePengumuman(id) {
+  if (confirm("Hapus pengumuman ini?")) {
+    state.pengumuman = state.pengumuman.filter(p => p.id !== id);
+    saveState();
+    renderAdminPengumuman();
+    showToast("Pengumuman dihapus.", "success");
+  }
+}
+
 // --- EMERGENCY PANIC LOGS CONTROLLER ---
 function renderAdminPanicLogsTable() {
   const container = document.getElementById('admin-panic-logs-table-body');
@@ -1012,7 +1112,7 @@ function renderAdminPanicLogsTable() {
     
     let photoHTML = 'Tidak Ada';
     if (log.foto) {
-      photoHTML = `<button class="btn btn-secondary" onclick="window.open('${log.foto}', '_blank')" style="min-height:32px; padding:0.15rem 0.5rem; font-size:0.8rem;"><i data-lucide="image"></i> Lihat Foto</button>`;
+      photoHTML = `<button class="btn btn-secondary" onclick="const win = window.open(); win.document.write('<title>Foto Darurat</title><body style=\\'margin:0;display:flex;justify-content:center;align-items:center;background:#222;\\'><img src=\\'${log.foto}\\' style=\\'max-width:100%;max-height:100vh;\\'></body>');" style="min-height:32px; padding:0.15rem 0.5rem; font-size:0.8rem;"><i data-lucide="image"></i> Lihat Foto</button>`;
     }
     
     container.innerHTML += `
@@ -1074,6 +1174,7 @@ setInterval(() => {
       if (parsed.template) state.template = parsed.template;
       if (parsed.appointments) state.appointments = parsed.appointments;
       if (parsed.emergencyLogs) state.emergencyLogs = parsed.emergencyLogs;
+      if (parsed.pengumuman) state.pengumuman = parsed.pengumuman;
       
       const newStateStr = JSON.stringify(state);
       
@@ -1085,6 +1186,7 @@ setInterval(() => {
         renderCashLogsList('admin-cash-logs');
         renderAdminAppointmentsTable();
         renderAdminPanicLogsTable();
+        renderAdminPengumuman();
         checkEmergencyAlertStatus();
         setTimeout(initChartJS, 50);
       }
@@ -1109,6 +1211,7 @@ window.addEventListener('storage', (e) => {
         if (parsed.template) state.template = parsed.template;
         if (parsed.appointments) state.appointments = parsed.appointments;
         if (parsed.emergencyLogs) state.emergencyLogs = parsed.emergencyLogs;
+        if (parsed.pengumuman) state.pengumuman = parsed.pengumuman;
         
         if (currentUser) {
           calculateAdminStats();
@@ -1118,6 +1221,7 @@ window.addEventListener('storage', (e) => {
           renderCashLogsList('admin-cash-logs');
           renderAdminAppointmentsTable();
           renderAdminPanicLogsTable();
+          renderAdminPengumuman();
           checkEmergencyAlertStatus();
           setTimeout(initChartJS, 50);
         }

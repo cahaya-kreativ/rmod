@@ -142,6 +142,9 @@
         <button class="tab-btn" id="tab-admin-template" onclick="switchAdminTab('template')">
           <i data-lucide="settings"></i> Template Surat RT/RW
         </button>
+        <button class="tab-btn" id="tab-admin-pengumuman" onclick="switchAdminTab('pengumuman')">
+          <i data-lucide="megaphone"></i> Kelola Pengumuman
+        </button>
       </div>
 
       <!-- TAB ADMIN 1: KEPENDUDUKAN (CRUD) -->
@@ -283,40 +286,91 @@
       <!-- TAB ADMIN 4: TEMPLATE SURAT PENGANTAR -->
       <div id="admin-tab-template-content" style="display: none;">
         <div class="card">
-          <div class="card-title" style="border-bottom: none; margin-bottom: 0.5rem;">
-            <span style="display: flex; align-items: center; gap: 0.75rem;"><i data-lucide="settings"></i> Pengaturan Template Surat Pengantar RT/RW</span>
-          </div>
+          <h3 class="card-title" style="color: var(--primary);"><i data-lucide="settings"></i> Pengaturan Template Kop Surat Pengantar</h3>
           <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">
-            Ketua RT/RW dapat merubah secara dinamis Kop Surat, Alamat Kontak Sekretariat, dan Kalimat Penutup resmi yang tercetak di setiap berkas digital warga.
+            Edit format standar yang akan digunakan sistem saat mencetak (PDF) surat pengantar otomatis untuk warga.
           </p>
           
           <form id="admin-template-form">
-            <div class="form-group" style="margin-bottom: 1.25rem;">
-              <label class="form-label" for="temp-kop">Kop Utama Surat (Nama RT/RW)</label>
-              <input type="text" id="temp-kop" class="form-input" placeholder="Contoh: RUKUN TETANGGA 03 RUKUN WARGA 04" required style="min-height:44px;">
+            <div class="form-group">
+              <label class="form-label" for="template-kop-judul">Kop Judul Atas (Level 1)</label>
+              <input type="text" id="template-kop-judul" class="form-input" value="RUKUN TETANGGA 03 / RUKUN WARGA 04" required>
             </div>
             
-            <div class="form-group" style="margin-bottom: 1.25rem;">
-              <label class="form-label" for="temp-subkop">Sub Kop Surat (Kelurahan/Kecamatan)</label>
-              <input type="text" id="temp-subkop" class="form-input" placeholder="Contoh: KELURAHAN BARU, KECAMATAN BOGOR UTARA" required style="min-height:44px;">
+            <div class="form-group">
+              <label class="form-label" for="template-kop-sub">Kop Sub Judul (Level 2)</label>
+              <input type="text" id="template-kop-sub" class="form-input" value="KELURAHAN BARU, KECAMATAN BOGOR UTARA" required>
             </div>
             
-            <div class="form-group" style="margin-bottom: 1.25rem;">
-              <label class="form-label" for="temp-kontak">Detail Alamat Sekretariat & Kontak</label>
-              <input type="text" id="temp-kontak" class="form-input" placeholder="Contoh: Sekretariat: Jl. Gang Cempaka No. 12B, Bogor. Telp: 081234567890" required style="min-height:44px;">
+            <div class="form-group">
+              <label class="form-label" for="template-kop-kontak">Informasi Kontak / Sekretariat</label>
+              <input type="text" id="template-kop-kontak" class="form-input" value="Sekretariat: Jl. Gang Cempaka No. 12B, Bogor. Telp: 081234567890" required>
             </div>
             
-            <div class="form-group" style="margin-bottom: 1.5rem;">
-              <label class="form-label" for="temp-penutup">Kalimat Penutup / Keterangan Resmi</label>
-              <textarea id="temp-penutup" class="form-input" style="min-height: 100px; resize: vertical; padding: 0.75rem;" placeholder="Masukkan paragraf penutup surat..." required></textarea>
+            <div class="form-group">
+              <label class="form-label" for="template-penutup">Paragraf Penutup Baku</label>
+              <textarea id="template-penutup" class="form-input" rows="3" required>Demikian Surat Pengantar ini dibuat dengan sebenar-benarnya untuk dipergunakan sebagai persyaratan pengurusan dokumen yang bersangkutan.</textarea>
             </div>
             
-            <button type="submit" class="btn btn-primary" style="min-height: 48px; font-weight: 700;">
-              <i data-lucide="save"></i> Simpan Template Baru
-            </button>
+            <button type="submit" class="btn btn-primary"><i data-lucide="save"></i> Simpan Template Surat</button>
           </form>
         </div>
       </div>
+
+      <!-- TAB ADMIN 7: PENGUMUMAN -->
+      <div id="admin-tab-pengumuman-content" style="display: none;">
+        <div class="card" style="margin-bottom: 2rem;">
+          <h3 class="card-title" style="color: var(--primary);"><i data-lucide="megaphone"></i> Buat Pengumuman Baru</h3>
+          <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">
+            Tulis pengumuman resmi RT/RW di sini. Pengumuman ini akan langsung terlihat di beranda (dashboard) seluruh warga.
+          </p>
+          
+          <form id="admin-add-pengumuman-form">
+            <div class="form-group">
+              <label class="form-label" for="pengumuman-judul">Judul Pengumuman</label>
+              <input type="text" id="pengumuman-judul" class="form-input" placeholder="Contoh: Kerja Bakti Massal Hari Minggu" required>
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label" for="pengumuman-isi">Isi Pesan / Keterangan Lengkap</label>
+              <textarea id="pengumuman-isi" class="form-input" rows="4" placeholder="Tulis rincian pengumuman..." required></textarea>
+            </div>
+            
+            <div class="form-group">
+              <label class="btn btn-secondary" id="pengumuman-upload-label" style="display: inline-block; cursor: pointer; text-align: center; width: auto; font-size: 0.9rem; margin-bottom: 0.5rem; background: #f8fafc;">
+                <i data-lucide="camera" style="width:14px; height:14px; vertical-align:-2px; margin-right:3px;"></i> Lampirkan Foto (Opsional)
+                <input type="file" id="pengumuman-file" accept="image/*" style="display: none;" onchange="handlePengumumanPhotoUpload(event)">
+              </label>
+              <img id="pengumuman-photo-preview" src="" style="display: none; max-width: 100%; max-height: 200px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); margin-top: 0.5rem;">
+            </div>
+            
+            <button type="submit" class="btn btn-primary" style="width: 100%;"><i data-lucide="send"></i> Siarkan Pengumuman ke Warga</button>
+          </form>
+        </div>
+        
+        <div class="card">
+          <h3 class="card-title"><i data-lucide="list"></i> Riwayat Pengumuman RT/RW</h3>
+          <div id="admin-pengumuman-list">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+      </div>
+      
+      <script>
+        function handlePengumumanPhotoUpload(event) {
+          const file = event.target.files[0];
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            const preview = document.getElementById('pengumuman-photo-preview');
+            preview.src = e.target.result;
+            preview.style.display = 'block';
+            document.getElementById('pengumuman-upload-label').innerHTML = `<i data-lucide="check"></i> Foto Dilampirkan (Ganti)`;
+            lucide.createIcons();
+          };
+          reader.readAsDataURL(file);
+        }
+      </script>
 
       <!-- TAB ADMIN 5: KELOLA JANJI TEMU -->
       <div id="admin-tab-janjian-content" style="display: none;">

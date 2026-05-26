@@ -87,13 +87,7 @@
     <main class="dashboard-wrapper" id="view-warga" style="display: none;">
       
       <!-- Announcement Banner -->
-      <div class="card" style="background-color: var(--primary-light); border-color: rgba(37, 99, 235, 0.2); padding: 1.25rem; display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;">
-        <i data-lucide="megaphone" style="color: var(--primary); width: 32px; height: 32px; flex-shrink: 0;"></i>
-        <div>
-          <h4 style="color: var(--primary); font-size: 1.1rem; font-weight: 700;">Informasi RT/RW</h4>
-          <p style="color: var(--text-secondary); font-size: 0.95rem;">Selamat datang di portal layanan mandiri R-MOD. Anda dapat memantau kas, melunasi iuran, mengajukan surat pengantar secara mandiri, dan memicu tombol darurat jika memerlukan pertolongan mendesak.</p>
-        </div>
-      </div>
+      <div id="warga-pengumuman-feed"></div>
 
       <div class="warga-grid">
         
@@ -216,6 +210,14 @@
                   <div class="stat-info">
                     <h4>Kas Masuk Bulan Ini</h4>
                     <div class="stat-value" id="warga-kas-masuk" style="color: var(--success); font-size: 1.6rem;">+Rp 2.100.000</div>
+                  </div>
+                </div>
+
+                <div class="stat-card" style="box-shadow: none; border-color: rgba(220, 38, 38, 0.15);">
+                  <div class="stat-icon" style="background-color: var(--danger-light); color: var(--danger);"><i data-lucide="arrow-up-right"></i></div>
+                  <div class="stat-info">
+                    <h4>Kas Keluar Bulan Ini</h4>
+                    <div class="stat-value" id="warga-kas-keluar" style="color: var(--danger); font-size: 1.6rem;">-Rp 500.000</div>
                   </div>
                 </div>
               </div>
