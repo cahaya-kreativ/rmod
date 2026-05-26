@@ -905,18 +905,18 @@ function setupTemplateHandler() {
   const form = document.getElementById('admin-template-form');
   if (form) {
     // prefill
-    document.getElementById('temp-kop').value = state.template.kop;
-    document.getElementById('temp-subkop').value = state.template.subKop;
-    document.getElementById('temp-kontak').value = state.template.kontak;
-    document.getElementById('temp-penutup').value = state.template.penutup;
+    document.getElementById('template-kop-judul').value = state.template.kop;
+    document.getElementById('template-kop-sub').value = state.template.subKop;
+    document.getElementById('template-kop-kontak').value = state.template.kontak;
+    document.getElementById('template-penutup').value = state.template.penutup;
     
     form.addEventListener('submit', (e) => {
       e.preventDefault();
       state.template = {
-        kop: document.getElementById('temp-kop').value.trim(),
-        subKop: document.getElementById('temp-subkop').value.trim(),
-        kontak: document.getElementById('temp-kontak').value.trim(),
-        penutup: document.getElementById('temp-penutup').value.trim()
+        kop: document.getElementById('template-kop-judul').value.trim(),
+        subKop: document.getElementById('template-kop-sub').value.trim(),
+        kontak: document.getElementById('template-kop-kontak').value.trim(),
+        penutup: document.getElementById('template-penutup').value.trim()
       };
       
       saveState();
@@ -1067,8 +1067,12 @@ function setupPengumumanHandler() {
       photoImg.src = '';
     }
     const label = document.getElementById('pengumuman-upload-label');
-    if (label) label.innerHTML = `<i data-lucide="camera" style="width:14px; height:14px; vertical-align:-2px; margin-right:3px;"></i> Lampirkan Foto (Opsional)`;
-    
+    if (label) {
+      // Restore label with camera icon and file input
+      label.innerHTML = `<i data-lucide="camera" style="width:14px; height:14px; vertical-align:-2px; margin-right:3px;"></i> Lampirkan Foto (Opsional)<input type="file" id="pengumuman-file" accept="image/*" style="display:none;" onchange="handlePengumumanPhotoUpload(event)">`;
+      lucide.createIcons();
+    }
+
     renderAdminPengumuman();
     showToast("Pengumuman berhasil ditambahkan dan disiarkan ke warga.", "success");
   });

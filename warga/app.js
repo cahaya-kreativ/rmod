@@ -335,6 +335,7 @@ function renderWargaPengumuman() {
   });
   
   container.innerHTML = html;
+  lucide.createIcons();
 }
 
 function switchWargaTab(tab) {
