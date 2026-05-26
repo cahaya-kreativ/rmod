@@ -298,7 +298,7 @@ function renderWargaPortal() {
 function renderWargaPengumuman() {
   const container = document.getElementById('warga-pengumuman-feed');
   if (!container) return;
-  
+
   if (!state.pengumuman || state.pengumuman.length === 0) {
     container.innerHTML = `
       <div class="card" style="background-color: var(--primary-light); border-color: rgba(37, 99, 235, 0.2); padding: 1.25rem; display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;">
@@ -309,33 +309,59 @@ function renderWargaPengumuman() {
         </div>
       </div>
     `;
+    lucide.createIcons();
     return;
   }
-  
-  // Sort by latest first
+
+  // Sort newest first
   const sorted = [...state.pengumuman].sort((a, b) => b.id - a.id);
-  
-  let html = '';
+
+  // Build slide markup
+  let slides = '';
   sorted.forEach(p => {
     let imgHtml = '';
     if (p.foto) {
       imgHtml = `<div style="margin-top: 1rem;"><img src="${p.foto}" style="max-width: 100%; max-height: 300px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);"></div>`;
     }
-    
-    html += `
-      <div class="card" style="background-color: #fff; border-left: 4px solid var(--primary); padding: 1.25rem; margin-bottom: 1.5rem; position: relative;">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
-          <h4 style="color: var(--primary); font-size: 1.15rem; font-weight: 700; margin: 0;"><i data-lucide="bell" style="width:18px; height:18px; vertical-align:-2px; margin-right:4px;"></i> ${p.judul}</h4>
-          <span style="font-size: 0.8rem; color: var(--text-muted); background: var(--bg-alt); padding: 0.2rem 0.5rem; border-radius: 10px;">${p.tanggal}</span>
+    slides += `
+      <div class="carousel-slide" style="flex:0 0 100%; scroll-snap-align:start;">
+        <div class="card" style="background-color: #fff; border-left: 4px solid var(--primary); padding: 1.25rem; margin-bottom: 1.5rem; position: relative;">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+            <h4 style="color: var(--primary); font-size: 1.15rem; font-weight: 700; margin: 0;"><i data-lucide="bell" style="width:18px; height:18px; vertical-align:-2px; margin-right:4px;"></i> ${p.judul}</h4>
+            <span style="font-size: 0.8rem; color: var(--text-muted); background: var(--bg-alt); padding: 0.2rem 0.5rem; border-radius: 10px;">${p.tanggal}</span>
+          </div>
+          <p style="color: var(--text-primary); font-size: 0.95rem; white-space: pre-wrap; line-height: 1.5; margin: 0;">${p.isi}</p>
+          ${imgHtml}
         </div>
-        <p style="color: var(--text-primary); font-size: 0.95rem; white-space: pre-wrap; line-height: 1.5; margin: 0;">${p.isi}</p>
-        ${imgHtml}
-      </div>
-    `;
+      </div>`;
   });
-  
-  container.innerHTML = html;
+
+  const carouselHtml = `
+    <div class="carousel-wrapper" style="position:relative; overflow:hidden;">
+      <button class="carousel-btn" onclick="prevPengumuman()" style="position:absolute; left:0; top:50%; transform:translateY(-50%); background:rgba(255,255,255,0.7); border:none; font-size:2rem; cursor:pointer; z-index:2; padding:0 0.5rem;">&#8249;</button>
+      <div id="warga-pengumuman-track" class="carousel-track" style="display:flex; overflow-x:hidden; scroll-snap-type:x mandatory; gap:1rem; scroll-behavior:smooth;">
+        ${slides}
+      </div>
+      <button class="carousel-btn" onclick="nextPengumuman()" style="position:absolute; right:0; top:50%; transform:translateY(-50%); background:rgba(255,255,255,0.7); border:none; font-size:2rem; cursor:pointer; z-index:2; padding:0 0.5rem;">&#8250;</button>
+    </div>
+  `;
+
+  container.innerHTML = carouselHtml;
   lucide.createIcons();
+}
+
+// Carousel navigation helpers for warga pengumuman
+function prevPengumuman() {
+  const track = document.getElementById('warga-pengumuman-track');
+  if (!track) return;
+  const width = track.clientWidth;
+  track.scrollBy({ left: -width, behavior: 'smooth' });
+}
+function nextPengumuman() {
+  const track = document.getElementById('warga-pengumuman-track');
+  if (!track) return;
+  const width = track.clientWidth;
+  track.scrollBy({ left: width, behavior: 'smooth' });
 }
 
 function switchWargaTab(tab) {
