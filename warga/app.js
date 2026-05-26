@@ -76,44 +76,55 @@ let sirenTimeout = null;
 // Initialize state from local storage or load seeds
 function initApp() {
   const savedState = localStorage.getItem('rmod_state');
+  let needsSave = false;
   if (savedState) {
     try {
       state = JSON.parse(savedState);
     } catch (e) {
       console.error("Error loading state, reset to default", e);
       state = JSON.parse(JSON.stringify(DEFAULT_STATE));
+      needsSave = true;
     }
   } else {
     state = JSON.parse(JSON.stringify(DEFAULT_STATE));
-    saveState();
+    needsSave = true;
   }
   
-  // Defensive compatibility checks
-  if (!state.warga || !Array.isArray(state.warga) || state.warga.length === 0) {
+  // Defensive compatibility checks — only fix missing/corrupt keys,
+  // do NOT reset valid empty arrays (empty [] is valid state)
+  if (!state.warga || !Array.isArray(state.warga)) {
     state.warga = JSON.parse(JSON.stringify(DEFAULT_STATE.warga));
+    needsSave = true;
   }
-  if (!state.iuran || !Array.isArray(state.iuran) || state.iuran.length === 0) {
+  if (!state.iuran || !Array.isArray(state.iuran)) {
     state.iuran = JSON.parse(JSON.stringify(DEFAULT_STATE.iuran));
+    needsSave = true;
   }
-  if (!state.kas || !Array.isArray(state.kas) || state.kas.length === 0) {
+  if (!state.kas || !Array.isArray(state.kas)) {
     state.kas = JSON.parse(JSON.stringify(DEFAULT_STATE.kas));
+    needsSave = true;
   }
   if (!state.surat || !Array.isArray(state.surat)) {
     state.surat = JSON.parse(JSON.stringify(DEFAULT_STATE.surat));
+    needsSave = true;
   }
   if (!state.appointments || !Array.isArray(state.appointments)) {
     state.appointments = JSON.parse(JSON.stringify(DEFAULT_STATE.appointments));
+    needsSave = true;
   }
   if (!state.emergencyLogs || !Array.isArray(state.emergencyLogs)) {
     state.emergencyLogs = JSON.parse(JSON.stringify(DEFAULT_STATE.emergencyLogs));
+    needsSave = true;
   }
   if (!state.emergency) {
     state.emergency = JSON.parse(JSON.stringify(DEFAULT_STATE.emergency));
+    needsSave = true;
   }
   if (!state.template) {
     state.template = JSON.parse(JSON.stringify(DEFAULT_STATE.template));
+    needsSave = true;
   }
-  saveState();
+  if (needsSave) saveState();
   
   // Restore session if exists
   const savedSession = localStorage.getItem('rmod_session');
