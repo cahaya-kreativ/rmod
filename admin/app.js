@@ -74,6 +74,15 @@ let sirenGain = null;
 let isSirenPlaying = false;
 let sirenTimeout = null;
 
+// Global helper: open image/document in a new tab (avoids about:blank with data URIs)
+function openImagePreview(src) {
+  const win = window.open('', '_blank');
+  if (win) {
+    win.document.write(`<!DOCTYPE html><html><head><title>Lihat Berkas</title></head><body style="margin:0;display:flex;justify-content:center;align-items:center;min-height:100vh;background:#222;"><img src="${src}" style="max-width:100%;max-height:100vh;object-fit:contain;"></body></html>`);
+    win.document.close();
+  }
+}
+
 // Initialize state from local storage or load seeds
 function initApp() {
   const savedState = localStorage.getItem('rmod_state');
@@ -340,7 +349,7 @@ function checkEmergencyAlertStatus() {
         photoHTML = `
           <div style="margin-top:0.75rem;">
             <strong>📸 Lampiran Foto:</strong><br>
-            <img src="${em.foto}" style="max-width:100%; max-height:180px; border-radius:var(--radius-sm); border:2px solid white; margin-top:0.5rem; cursor:zoom-in;" onclick="const win = window.open(); win.document.write('<title>Foto Darurat</title><body style=\\'margin:0;display:flex;justify-content:center;align-items:center;background:#222;\\'><img src=\\'${em.foto}\\' style=\\'max-width:100%;max-height:100vh;\\'></body>');">
+            <img src="${em.foto}" style="max-width:100%; max-height:180px; border-radius:var(--radius-sm); border:2px solid white; margin-top:0.5rem; cursor:zoom-in;" onclick="openImagePreview('${em.foto}')">
           </div>`;
       }
       
@@ -672,7 +681,7 @@ function renderAdminLettersQueue() {
     if (item.jenis === 'Hanya Tanda Tangan' && item.dokumen) {
       actionHTML = `
         <div style="display:flex; flex-direction:column; gap:0.25rem;">
-          <button class="btn btn-secondary" onclick="window.open('${item.dokumen}', '_blank')" style="min-height:36px; padding:0.25rem 0.5rem; font-size:0.85rem; margin-bottom:0.25rem;"><i data-lucide="eye"></i> Lihat Berkas</button>
+          <button class="btn btn-secondary" onclick="openImagePreview('${item.dokumen}')" style="min-height:36px; padding:0.25rem 0.5rem; font-size:0.85rem; margin-bottom:0.25rem;"><i data-lucide="eye"></i> Lihat Berkas</button>
           <div style="display:flex; gap:0.25rem;">
             <button class="btn btn-primary" onclick="approveLetter('${item.id}')" style="min-height:32px; padding:0.25rem 0.5rem; font-size:0.8rem; background-color:var(--success); border-color:var(--success);"><i data-lucide="check"></i> ACC</button>
             <button class="btn btn-primary" onclick="rejectLetter('${item.id}')" style="min-height:32px; padding:0.25rem 0.5rem; font-size:0.8rem; background-color:var(--danger); border-color:var(--danger);"><i data-lucide="x"></i> Tolak</button>
@@ -1116,7 +1125,8 @@ function renderAdminPanicLogsTable() {
     
     let photoHTML = 'Tidak Ada';
     if (log.foto) {
-      photoHTML = `<button class="btn btn-secondary" onclick="const win = window.open(); win.document.write('<title>Foto Darurat</title><body style=\\'margin:0;display:flex;justify-content:center;align-items:center;background:#222;\\'><img src=\\'${log.foto}\\' style=\\'max-width:100%;max-height:100vh;\\'></body>');" style="min-height:32px; padding:0.15rem 0.5rem; font-size:0.8rem;"><i data-lucide="image"></i> Lihat Foto</button>`;
+      photoHTML = `<button class="btn btn-secondary" onclick="openImagePreview('${log.foto}')" style="min-height:32px; padding:0.15rem 0.5rem; font-size:0.8rem;">
+            <i data-lucide="image"></i> Lihat Foto</button>`;
     }
     
     container.innerHTML += `
