@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="R-MOD - Gateway Platform Digital Administrasi & Keuangan RT/RW Modern, Transparan, dan Ramah Lansia.">
+  <title>R-MOD - Gateway RT/RW Digital</title>
+  <link rel="stylesheet" href="style.css?v=3">
+  <!-- Lucide Icons for beautiful SVGs -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    body {
+      background: radial-gradient(circle at 50% 50%, #f8fafc 0%, #f1f5f9 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1.5rem;
+    }
+    
+    .gateway-container {
+      max-width: 900px;
+      width: 100%;
+      text-align: center;
+      margin: 0 auto;
+    }
+    
+    .gateway-header {
+      margin-bottom: 3.5rem;
+      animation: fadeInDown 0.8s ease-out;
+    }
+    
+    .gateway-logo {
+      width: 72px;
+      height: 72px;
+      background-color: var(--primary);
+      color: white;
+      border-radius: var(--radius-lg);
+      font-family: 'Outfit', sans-serif;
+      font-size: 2.2rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.25rem;
+      box-shadow: var(--shadow-md);
+    }
+    
+    .gateway-header h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2.6rem;
+      color: var(--text-primary);
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+    }
+    
+    .gateway-header p {
+      font-size: 1.15rem;
+      color: var(--text-secondary);
+      max-width: 600px;
+      margin: 0 auto;
+      line-height: 1.5;
+    }
+    
+    .gateway-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-bottom: 3.5rem;
+      animation: fadeInUp 0.8s ease-out;
+    }
+    
+    @media (max-width: 768px) {
+      .gateway-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+      }
+    }
+    
+    .gateway-card {
+      background-color: var(--bg-card);
+      border: 2px solid var(--border-color);
+      border-radius: var(--radius-xl);
+      padding: 3rem 2rem;
+      text-decoration: none;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: pointer;
+      box-shadow: var(--shadow-sm);
+    }
+    
+    .gateway-card:hover {
+      transform: translateY(-8px);
+      box-shadow: var(--shadow-xl);
+    }
+    
+    .gateway-card.warga-card:hover {
+      border-color: var(--primary);
+      background-color: var(--primary-light);
+    }
+    
+    .gateway-card.admin-card:hover {
+      border-color: var(--danger);
+      background-color: #fef2f2;
+    }
+    
+    .gateway-icon-circle {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1.75rem;
+      transition: all 0.3s ease;
+    }
+    
+    .warga-icon-circle {
+      background-color: var(--primary-light);
+      color: var(--primary);
+    }
+    
+    .gateway-card.warga-card:hover .warga-icon-circle {
+      background-color: var(--primary);
+      color: white;
+      transform: scale(1.1);
+    }
+    
+    .admin-icon-circle {
+      background-color: #fef2f2;
+      color: var(--danger);
+    }
+    
+    .gateway-card.admin-card:hover .admin-icon-circle {
+      background-color: var(--danger);
+      color: white;
+      transform: scale(1.1);
+    }
+    
+    .gateway-card h3 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      margin-bottom: 0.75rem;
+    }
+    
+    .gateway-card p {
+      font-size: 1rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      margin-bottom: 2rem;
+    }
+    
+    .gateway-btn {
+      width: 100%;
+      min-height: 48px;
+      border-radius: var(--radius-md);
+      font-weight: 700;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      transition: var(--transition);
+    }
+    
+    .gateway-card.warga-card .gateway-btn {
+      background-color: var(--primary);
+      color: white;
+    }
+    
+    .gateway-card.warga-card:hover .gateway-btn {
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    }
+    
+    .gateway-card.admin-card .gateway-btn {
+      background-color: var(--danger);
+      color: white;
+    }
+    
+    .gateway-card.admin-card:hover .gateway-btn {
+      box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+    }
+    
+    .gateway-footer {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      animation: fadeIn 1s ease-out;
+    }
+    
+    .gateway-footer strong {
+      color: var(--text-secondary);
+    }
+    
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="gateway-container">
+    
+    <header class="gateway-header">
+      <div class="gateway-logo">RM</div>
+      <h1>Selamat Datang di R-MOD</h1>
+      <p>Platform Digital Rukun Modern - Layanan Mandiri Administrasi & Transparansi Keuangan RT 03 RW 04 Kelurahan Baru</p>
+    </header>
+    
+    <div class="gateway-grid">
+      
+      <!-- Option A: Portal Warga -->
+      <a href="warga/" class="gateway-card warga-card">
+        <div class="gateway-icon-circle warga-icon-circle">
+          <i data-lucide="user" style="width: 36px; height: 36px;"></i>
+        </div>
+        <h3>Portal Mandiri Warga</h3>
+        <p>Akses khusus warga untuk memantau iuran RT/RW bulanan, melaporkan pembayaran iuran QRIS, mengajukan surat pengantar resmi, dan menjadwalkan janji temu Ketua RT.</p>
+        <div class="gateway-btn">
+          <span>Masuk Portal Warga</span> <i data-lucide="arrow-right" style="width: 18px; height: 18px;"></i>
+        </div>
+      </a>
+      
+      <!-- Option B: Dasbor Admin -->
+      <a href="admin/" class="gateway-card admin-card">
+        <div class="gateway-icon-circle admin-icon-circle">
+          <i data-lucide="shield-alert" style="width: 36px; height: 36px;"></i>
+        </div>
+        <h3>Dasbor Pengurus (Admin)</h3>
+        <p>Akses khusus pengurus/Admin RT/RW untuk mengelola database kependudukan, ACC surat pengantar warga, verifikasi pembayaran iuran, dan memantau alarm keadaan darurat.</p>
+        <div class="gateway-btn">
+          <span>Masuk Dasbor Admin</span> <i data-lucide="arrow-right" style="width: 18px; height: 18px;"></i>
+        </div>
+      </a>
+      
+    </div>
+    
+    <footer class="gateway-footer">
+      <p>
+        Sistem ini dirancang <strong>Senior-Friendly (Ramah Orang Tua)</strong> dengan kontras warna tinggi, target sentuh lebar, dan performa instan.
+      </p>
+      <p style="font-size: 0.85rem; margin-top: 0.5rem;">
+        R-MOD Digital RT/RW &copy; 2026. Semua hak dilindungi.
+      </p>
+    </footer>
+    
+  </div>
+
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+</html>

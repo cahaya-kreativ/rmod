@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="R-MOD - Portal Digital Mandiri Warga RT/RW Modern, Transparan, dan Ramah Lansia.">
+  <title>R-MOD - Portal Layanan Mandiri Warga</title>
+  <link rel="stylesheet" href="../style.css?v=3">
+  <!-- Lucide Icons for beautiful crisp SVGs -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+
+  <div class="app-container">
+    
+    <!-- Top Premium Navigation Bar -->
+    <header id="app-header" style="display: none;">
+      <div class="header-content">
+        <div class="logo-area">
+          <div class="logo-icon">RM</div>
+          <div class="logo-text">
+            <h1>R-MOD</h1>
+            <p>Rukun Modern Digital</p>
+          </div>
+        </div>
+        
+        <div class="header-actions">
+          <div class="user-badge" id="header-user-badge">
+            <div class="user-badge-avatar" id="header-avatar">W</div>
+            <div class="user-badge-name" id="header-username">Warga</div>
+          </div>
+          
+          <button class="btn btn-secondary" id="logout-btn" style="min-height: 40px; padding: 0.5rem 1rem;">
+            <i data-lucide="log-out"></i> Keluar
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- SPA VIEW 1: LOGIN PORTAL (User Friendly & Prominent Info) -->
+    <main class="login-screen" id="view-login">
+      <div class="login-card">
+        <div class="login-header">
+          <div class="app-logo-large">RM</div>
+          <h2>Portal Masuk Warga</h2>
+          <p>Silakan masuk menggunakan NIK Anda untuk mengakses Portal Mandiri Warga</p>
+        </div>
+        
+        <form id="login-form">
+          <div class="form-group">
+            <label class="form-label" for="login-username">Nomor NIK Warga (10 Digit)</label>
+            <input type="text" id="login-username" class="form-input" placeholder="Masukkan NIK warga..." required autocomplete="username">
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label" for="login-password">Kata Sandi (Password)</label>
+            <input type="password" id="login-password" class="form-input" placeholder="Masukkan kata sandi..." required autocomplete="current-password">
+          </div>
+          
+          <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem;">
+            <i data-lucide="log-in"></i> Masuk Sekarang
+          </button>
+        </form>
+
+        <!-- Informative Demo Box for testing efficiency -->
+        <div class="demo-credentials-box">
+          <div class="demo-credentials-title">
+            <i data-lucide="info" style="width: 18px; height: 18px;"></i>
+            <span>Akun Demo Warga Uji Coba:</span>
+          </div>
+          <ul>
+            <li><strong>1. Warga 1 (Budi Santoso):</strong><br>NIK: <code>3201010101</code> | Sandi: <code>warga</code></li>
+            <li><strong>2. Warga 2 (Siti Aminah):</strong><br>NIK: <code>3201010102</code> | Sandi: <code>warga</code></li>
+          </ul>
+          <p style="margin-top: 0.5rem; font-size: 0.85rem; color: var(--text-secondary); line-height: 1.3; margin-bottom: 0.75rem;">
+            *Password default adalah 'warga'. Warga baru yang ditambahkan di Admin juga bisa langsung login di halaman ini.
+          </p>
+          
+          <button type="button" class="btn btn-secondary" onclick="resetDemoData()" style="width: 100%; min-height: 40px; margin-top: 0.5rem; background-color: rgba(220, 38, 38, 0.08); color: var(--danger); border-color: rgba(220, 38, 38, 0.2); font-weight: 700; font-size: 0.9rem; transition: all 0.2s ease;">
+            <i data-lucide="refresh-cw"></i> Reset Database & Data Demo RT/RW
+          </button>
+        </div>
+      </div>
+    </main>
+
+    <!-- SPA VIEW 2: PORTAL WARGA (Resident Area) -->
+    <main class="dashboard-wrapper" id="view-warga" style="display: none;">
+      
+      <!-- Announcement Banner -->
+      <div class="card" style="background-color: var(--primary-light); border-color: rgba(37, 99, 235, 0.2); padding: 1.25rem; display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;">
+        <i data-lucide="megaphone" style="color: var(--primary); width: 32px; height: 32px; flex-shrink: 0;"></i>
+        <div>
+          <h4 style="color: var(--primary); font-size: 1.1rem; font-weight: 700;">Informasi RT/RW</h4>
+          <p style="color: var(--text-secondary); font-size: 0.95rem;">Selamat datang di portal layanan mandiri R-MOD. Anda dapat memantau kas, melunasi iuran, mengajukan surat pengantar secara mandiri, dan memicu tombol darurat jika memerlukan pertolongan mendesak.</p>
+        </div>
+      </div>
+
+      <div class="warga-grid">
+        
+        <!-- Sidebar Column (Profile and Panic Button) -->
+        <aside class="sidebar-area">
+          
+          <!-- Citizen Information Card -->
+          <div class="card warga-profile-card">
+            <h3 class="card-title"><i data-lucide="user"></i> Profil Warga</h3>
+            <div class="warga-avatar-container">
+              <div class="warga-avatar" id="warga-avatar-char">W</div>
+            </div>
+            <h4 class="warga-profile-name" id="warga-profile-name">Nama Warga</h4>
+            <div class="warga-profile-nik" id="warga-profile-nik">NIK: -</div>
+            
+            <div class="warga-meta-info">
+              <div class="warga-meta-row">
+                <strong>No. Rumah</strong>
+                <span id="warga-meta-house">-</span>
+              </div>
+              <div class="warga-meta-row">
+                <strong>No. Telepon</strong>
+                <span id="warga-meta-phone">-</span>
+              </div>
+              <div class="warga-meta-row">
+                <strong>Status Iuran</strong>
+                <span id="warga-meta-status-badge"><span class="badge badge-success">Lunas</span></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- PANIC BUTTON CARD (Accessible & Visual) -->
+          <div class="card panic-button-card">
+            <h3 class="card-title" style="color: var(--danger); border-bottom-color: #fecaca;"><i data-lucide="shield-alert"></i> Bantuan Darurat</h3>
+            <p style="color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 1rem; font-weight: 600;">
+              Lengkapi jenis darurat dan opsional lampiran foto, lalu tahan tombol darurat selama 3 detik.
+            </p>
+            
+            <div class="form-group" style="margin-bottom: 0.75rem;">
+              <label class="form-label" style="font-size:0.85rem; margin-bottom:0.25rem;">Jenis Keadaan Darurat</label>
+              <select id="panic-type" class="form-input" style="min-height: 38px; padding: 0.35rem 0.75rem; font-size:0.9rem;">
+                <option value="Medis / Sakit Parah">🚑 Medis / Sakit Parah</option>
+                <option value="Kejahatan / Pencurian">🚨 Kejahatan / Pencurian</option>
+                <option value="Kebakaran">🔥 Kebakaran</option>
+                <option value="Bencana Alam / Lainnya">🌊 Bencana Alam / Lainnya</option>
+              </select>
+            </div>
+            
+            <div class="form-group" style="margin-bottom: 0.75rem;">
+              <label class="form-label" style="font-size:0.85rem; margin-bottom:0.25rem;">Keterangan Singkat / Laporan</label>
+              <input type="text" id="panic-desc" class="form-input" placeholder="Contoh: Ada maling, sesak napas..." style="min-height: 38px; font-size:0.9rem;">
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1rem;">
+              <label class="form-label" style="font-size:0.85rem; margin-bottom:0.25rem;">Foto Kejadian (Opsional)</label>
+              <div class="file-upload-wrapper" id="panic-upload-box" style="padding: 0.5rem; min-height: 48px; border: 2px dashed var(--border-color); border-radius: var(--radius-md); text-align: center; cursor: pointer; position: relative;">
+                <div class="file-upload-text" id="panic-upload-label" style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary);"><i data-lucide="camera" style="width:14px; height:14px; vertical-align:-2px; margin-right:3px;"></i> Unggah Foto Darurat</div>
+                <input type="file" id="panic-upload-input" class="file-upload-input" accept="image/*" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer;">
+              </div>
+              <img id="panic-photo-preview" class="receipt-preview" style="max-height: 70px; margin-top: 0.5rem;">
+            </div>
+
+            <div class="panic-button-container">
+              <button class="panic-trigger" id="panic-button">
+                <div class="panic-trigger-icon">🚨</div>
+                <div class="panic-trigger-text">PANIC BUTTON</div>
+                <div class="panic-countdown" id="panic-countdown-box">3</div>
+              </button>
+              <p class="panic-instruction" id="panic-instruction-label">TEKAN & TAHAN 3 DETIK</p>
+              
+              <!-- MUTE RESIDENT ALARM BUTTON -->
+              <button class="btn btn-secondary" id="warga-mute-siren-btn" style="display: none; margin-top: 0.75rem; width: 100%; min-height: 38px; font-size: 0.9rem; border-color: rgba(220, 38, 38, 0.3); color: var(--danger);">
+                <i data-lucide="volume-x"></i> Senyapkan Sirine (5s)
+              </button>
+            </div>
+            <p style="font-size: 0.85rem; color: #991b1b; line-height: 1.3; margin-top: 0.5rem;">
+              *Sistem akan membunyikan sirine dan mengirimkan alarm darurat ke Dasbor Pengurus RT/RW seketika.
+            </p>
+          </div>
+
+        </aside>
+
+        <!-- Main Column (Letter Service and Fee Management) -->
+        <section class="main-content-area">
+          
+          <!-- Tab Navigation for Warga -->
+          <div class="tabs-nav">
+            <button class="tab-btn active" id="tab-warga-iuran" onclick="switchWargaTab('iuran')">
+              <i data-lucide="wallet"></i> Kelola Iuran & Kas
+            </button>
+            <button class="tab-btn" id="tab-warga-surat" onclick="switchWargaTab('surat')">
+              <i data-lucide="file-text"></i> Layanan Surat Pengantar
+            </button>
+            <button class="tab-btn" id="tab-warga-janjian" onclick="switchWargaTab('janjian')">
+              <i data-lucide="calendar"></i> Janji Temu RT/RW
+            </button>
+          </div>
+
+          <!-- TAB CONTENT 1: IURAN & KAS -->
+          <div id="warga-tab-iuran-content">
+            
+            <!-- Kas RT Ringkasan Transparansi -->
+            <div class="card" style="background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%);">
+              <h3 class="card-title"><i data-lucide="trending-up"></i> Transparansi Kas RT/RW</h3>
+              <p style="color: var(--text-secondary); margin-bottom: 1.25rem;">
+                Berikut saldo total kas warga RT 03 / RW 04 yang terkelola secara terbuka. Warga dapat memantau kas masuk dan keluar kapan saja.
+              </p>
+              
+              <div class="stats-grid" style="margin-bottom: 0;">
+                <div class="stat-card" style="box-shadow: none; border-color: rgba(37, 99, 235, 0.15);">
+                  <div class="stat-icon primary"><i data-lucide="landmark"></i></div>
+                  <div class="stat-info">
+                    <h4>Total Saldo Kas RT</h4>
+                    <div class="stat-value" id="warga-total-kas" style="font-size: 1.6rem;">Rp 12.450.000</div>
+                  </div>
+                </div>
+                
+                <div class="stat-card" style="box-shadow: none; border-color: rgba(5, 150, 105, 0.15);">
+                  <div class="stat-icon success"><i data-lucide="arrow-down-left"></i></div>
+                  <div class="stat-info">
+                    <h4>Kas Masuk Bulan Ini</h4>
+                    <div class="stat-value" id="warga-kas-masuk" style="color: var(--success); font-size: 1.6rem;">+Rp 2.100.000</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Billing Section -->
+            <div class="card">
+              <h3 class="card-title"><i data-lucide="credit-card"></i> Status Tagihan Iuran Bulanan</h3>
+              <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+                Iuran wajib warga digunakan untuk Kebersihan Lingkungan, Keamanan Lingkungan (Satpam), dan Kas Sosial Kematian/Sakit warga.
+              </p>
+              
+              <div class="table-container">
+                <table class="custom-table">
+                  <thead>
+                    <tr>
+                      <th>Bulan</th>
+                      <th>Detail Jenis Iuran</th>
+                      <th>Nominal</th>
+                      <th>Status Pembayaran</th>
+                      <th>Aksi / Bukti</th>
+                    </tr>
+                  </thead>
+                  <tbody id="warga-iuran-table-body">
+                    <!-- Dynamic rendering in app.js -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Transparansi Log Kas RT -->
+            <div class="card">
+              <h3 class="card-title"><i data-lucide="list"></i> Riwayat Aliran Kas RT/RW Terbaru</h3>
+              <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+                Laporan real-time seluruh pengeluaran dan pemasukan kas lingkungan.
+              </p>
+              
+              <div class="cash-logs-list" id="warga-cash-logs">
+                <!-- Dynamic logs -->
+              </div>
+            </div>
+
+          </div>
+
+          <!-- TAB CONTENT 2: SURAT PENGANTAR -->
+          <div id="warga-tab-surat-content" style="display: none;">
+            
+            <!-- Request Form -->
+            <div class="card">
+              <h3 class="card-title"><i data-lucide="plus-circle"></i> Ajukan Surat Pengantar Baru</h3>
+              <p style="color: var(--text-secondary); margin-bottom: 1.25rem;">
+                Surat Pengantar RT/RW diperlukan untuk mengurus dokumen administrasi di Kelurahan (misalnya pembuatan KTP, KK, Surat Domisili, dll).
+              </p>
+              
+              <form id="warga-surat-form">
+                <div class="form-group">
+                  <label class="form-label">Pilih Jenis Surat Pengantar</label>
+                  <div class="letter-type-selector" id="surat-type-selector">
+                    <div class="letter-type-btn active" data-type="Surat Domisili">Domisili</div>
+                    <div class="letter-type-btn" data-type="Surat Pembuatan KTP/KK">KTP / KK</div>
+                    <div class="letter-type-btn" data-type="Surat Keterangan Usaha">Izin Usaha</div>
+                    <div class="letter-type-btn" data-type="Surat Keterangan Kematian">Kematian</div>
+                    <div class="letter-type-btn" data-type="Surat Pengantar Nikah">Nikah</div>
+                    <div class="letter-type-btn" data-type="Hanya Tanda Tangan">Hanya TTD Dokumen</div>
+                  </div>
+                </div>
+                
+                <!-- DYNAMIC FILE UPLOAD CONTAINER FOR ONLY MINTA TTD -->
+                <div class="form-group" id="document-to-sign-wrapper" style="display: none; margin-top: 1.25rem; margin-bottom: 1.25rem;">
+                  <label class="form-label">Unggah Foto Dokumen yang Ingin Ditandatangani</label>
+                  <div class="file-upload-wrapper" id="doc-upload-box" style="padding: 1.25rem; border: 2px dashed var(--border-color); background-color: #f8fafc; border-radius: var(--radius-md); text-align: center; cursor: pointer; position: relative;">
+                    <div class="file-upload-icon"><i data-lucide="file-up" style="width:24px; height:24px; color:var(--text-muted);"></i></div>
+                    <div class="file-upload-text" id="doc-upload-label" style="font-weight:600; color:var(--text-secondary); margin-top:5px;">Klik atau Tarik Foto Dokumen di Sini</div>
+                    <div class="file-upload-hint" style="font-size:0.85rem; color:var(--text-muted); margin-top:2px;">Format: JPG, PNG, Max 5MB</div>
+                    <input type="file" id="doc-upload-input" class="file-upload-input" accept="image/*" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer;">
+                  </div>
+                  <img id="doc-preview" class="receipt-preview" style="max-height: 150px; margin-top: 1rem;">
+                </div>
+                
+                <div class="form-group">
+                  <label class="form-label" id="surat-keperluan-label" for="surat-keperluan">Keperluan / Keterangan Tambahan</label>
+                  <textarea id="surat-keperluan" class="form-input" style="min-height: 100px; resize: vertical;" placeholder="Tuliskan alasan pengajuan surat secara lengkap (misal: Untuk persyaratan melamar pekerjaan atau pindah domisili)..." required></textarea>
+                </div>
+                
+                <button type="submit" class="btn btn-primary" style="min-height: 48px;">
+                  <i data-lucide="send"></i> Kirim Pengajuan Surat
+                </button>
+              </form>
+            </div>
+
+            <!-- Letters History List -->
+            <div class="card">
+              <h3 class="card-title"><i data-lucide="history"></i> Riwayat Pengajuan Surat Anda</h3>
+              <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+                Anda dapat mengunduh surat pengantar yang telah disetujui dalam format digital (dilengkapi tanda tangan pengurus).
+              </p>
+              
+              <div class="table-container">
+                <table class="custom-table">
+                  <thead>
+                    <tr>
+                      <th>Tanggal</th>
+                      <th>Jenis Surat</th>
+                      <th>Keperluan</th>
+                      <th>Status Pengurus</th>
+                      <th>Keterangan Pengurus / File</th>
+                    </tr>
+                  </thead>
+                  <tbody id="warga-surat-table-body">
+                    <!-- Dynamic rendering in app.js -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- TAB CONTENT 3: JANJI TEMU RT/RW -->
+          <div id="warga-tab-janjian-content" style="display: none;">
+            
+            <!-- Appointment Booking Form -->
+            <div class="card">
+              <h3 class="card-title"><i data-lucide="calendar-plus"></i> Ajukan Janji Temu Pengurus (RT/RW)</h3>
+              <p style="color: var(--text-secondary); margin-bottom: 1.25rem;">
+                Gunakan form ini untuk membuat janji temu langsung dengan Ketua RT atau Ketua RW untuk urusan tanda tangan basah, konsultasi warga, atau keperluan penting lainnya.
+              </p>
+              
+              <form id="warga-janjian-form">
+                <div class="grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                  <div class="form-group">
+                    <label class="form-label" for="janjian-target">Temui Siapa?</label>
+                    <select id="janjian-target" class="form-input" required style="min-height: 44px; padding: 0.5rem 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color); width: 100%;">
+                      <option value="Ketua RT">Ketua RT (Bp. Budi Santoso / Pengurus RT 03)</option>
+                      <option value="Ketua RW">Ketua RW (RW 04)</option>
+                    </select>
+                  </div>
+                  
+                  <div class="form-group">
+                    <label class="form-label" for="janjian-tanggal">Pilih Tanggal Pertemuan</label>
+                    <input type="date" id="janjian-tanggal" class="form-input" required style="min-height: 44px; padding: 0.5rem 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color); width: 100%;">
+                  </div>
+                </div>
+                
+                <div class="grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                  <div class="form-group">
+                    <label class="form-label" for="janjian-waktu">Pilih Waktu / Jam</label>
+                    <input type="time" id="janjian-waktu" class="form-input" required style="min-height: 44px; padding: 0.5rem 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color); width: 100%;">
+                  </div>
+                  
+                  <div class="form-group">
+                    <label class="form-label" for="janjian-keperluan-tipe">Tipe Keperluan</label>
+                    <select id="janjian-keperluan-tipe" class="form-input" required style="min-height: 44px; padding: 0.5rem 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color); width: 100%;">
+                      <option value="Tanda Tangan Basah">Tanda Tangan Basah Dokumen</option>
+                      <option value="Konsultasi Warga">Konsultasi Warga / Masalah Sosial</option>
+                      <option value="Penyerahan Berkas Fisik">Penyerahan Berkas Fisik</option>
+                      <option value="Keperluan Lainnya">Lainnya / Urgent</option>
+                    </select>
+                  </div>
+                </div>
+                
+                <div class="form-group" style="margin-bottom: 1.25rem;">
+                  <label class="form-label" for="janjian-detail">Detail Keperluan & Keterangan Tambahan</label>
+                  <textarea id="janjian-detail" class="form-input" style="min-height: 80px; resize: vertical; padding: 0.5rem 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color); width: 100%;" placeholder="Tulis rincian keperluan secara jelas (contoh: Menyerahkan berkas fisik jual beli tanah untuk minta ttd basah pak RT)..." required></textarea>
+                </div>
+                
+                <button type="submit" class="btn btn-primary" style="min-height: 48px; font-weight: 700;">
+                  <i data-lucide="calendar"></i> Jadwalkan Janji Temu
+                </button>
+              </form>
+            </div>
+
+            <!-- Appointment History List -->
+            <div class="card">
+              <h3 class="card-title"><i data-lucide="calendar-check"></i> Riwayat Jadwal Janji Temu Anda</h3>
+              <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+                Status persetujuan, penolakan, atau perubahan jadwal oleh pengurus akan diperbarui secara real-time di bawah ini.
+              </p>
+              
+              <div class="table-container">
+                <table class="custom-table">
+                  <thead>
+                    <tr>
+                      <th>Pengurus</th>
+                      <th>Tanggal & Waktu</th>
+                      <th>Keperluan</th>
+                      <th>Detail Keterangan</th>
+                      <th>Status Pengurus</th>
+                      <th>Catatan Pengurus</th>
+                    </tr>
+                  </thead>
+                  <tbody id="warga-janjian-table-body">
+                    <!-- Dynamic rendering in app.js -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+          </div>
+
+        </section>
+
+      </div>
+
+    </main>
+
+    <!-- Footer Copyright -->
+    <footer style="margin-top: 3rem; text-align: center; color: var(--text-muted); font-size: 0.9rem; padding: 1.5rem 0; border-top: 1px solid var(--border-color);">
+      <p>
+        &copy; 2026 <strong>R-MOD (Rukun Modern)</strong>. Platform Administrasi Mandiri Warga RT 03 / RW 04 Kelurahan Baru.
+      </p>
+      <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem;">
+        Butuh bantuan teknis? Hubungi Layanan Dukungan RT/RW di nomor rumah 12A atau WhatsApp Pengurus Terdekat.
+      </p>
+    </footer>
+
+  </div>
+
+  <!-- ==================== MODAL WINDOWS ==================== -->
+
+  <!-- MODAL 1: PAY BILL & SHOW QRIS -->
+  <div class="modal-overlay" id="modal-qris">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modal-qris-title">Bayar Iuran Bulanan</h3>
+        <button class="modal-close-btn" onclick="closeModal('modal-qris')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+          Anda dapat membayar secara instan menggunakan QRIS Statis di bawah atau menitipkan uang tunai ke Bendahara RT.
+        </p>
+        
+        <!-- Tab Select Payment Method -->
+        <div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem;">
+          <button class="btn btn-secondary active" id="method-qris-btn" onclick="togglePayMethod('qris')" style="flex: 1; min-height: 44px;">QRIS Digital</button>
+          <button class="btn btn-secondary" id="method-cash-btn" onclick="togglePayMethod('cash')" style="flex: 1; min-height: 44px;">Titip Tunai (Cash)</button>
+        </div>
+
+        <!-- Method A: QRIS Frame -->
+        <div id="pay-qris-area">
+          <div class="pay-qris-flex-container">
+            
+            <div class="qris-card-wrapper">
+              <div class="qris-card">
+                <div class="qris-header">QRIS</div>
+                <div class="qris-qr-frame" style="display: flex; align-items: center; justify-content: center; background: white; padding: 0.5rem; border-radius: var(--radius-sm);">
+                  <!-- Real image source pointing to the assets folder so the user can easily drop their own QRIS image -->
+                  <img src="../assets/qris.png" class="qris-qr-image" style="width: 100%; height: 100%; max-height: 190px; object-fit: contain; border-radius: var(--radius-xs);" alt="QRIS QR Code">
+                </div>
+                <div class="qris-nm" id="modal-qris-merchant">KAS RT 03 RW 04</div>
+                <div class="qris-id">NMID: ID102026889812</div>
+              </div>
+            </div>
+
+            <div class="uploader-wrapper">
+              <!-- Proof Uploader for validation -->
+              <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label" style="font-size: 0.95rem;">Unggah Bukti Transfer</label>
+                <div class="file-upload-wrapper">
+                  <i data-lucide="image" class="file-upload-icon"></i>
+                  <div class="file-upload-text" id="upload-label-text">Klik / Tarik Gambar Bukti</div>
+                  <div class="file-upload-hint">Format JPG/PNG, maks. 2MB</div>
+                  <input type="file" id="qris-receipt-file" class="file-upload-input" accept="image/*" onchange="handleReceiptUpload(event)">
+                </div>
+                <img id="qris-receipt-preview" class="receipt-preview" alt="Pratinjau Bukti Pembayaran">
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Method B: Cash Info -->
+        <div id="pay-cash-area" style="display: none;">
+          <div class="card" style="border-color: var(--primary); background-color: var(--primary-light); padding: 1.5rem; text-align: center;">
+            <i data-lucide="banknote" style="color: var(--primary); width: 48px; height: 48px; margin: 0 auto 0.75rem;"></i>
+            <h4 style="font-size: 1.25rem; font-weight: 700; color: var(--primary); margin-bottom: 0.5rem;">Pembayaran Titip Tunai</h4>
+            <p style="color: var(--text-secondary); line-height: 1.5;">
+              Silakan serahkan uang tunai sebesar <strong id="modal-cash-nominal">Rp 50.000</strong> kepada Bendahara RT (Ibu Siti / Rumah No. 08).
+            </p>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.75rem;">
+              Setelah uang diserahkan, Bendahara akan mencatat secara langsung di Dasbor RT dan status tagihan Anda otomatis menjadi Lunas.
+            </p>
+          </div>
+          
+          <div class="form-group" style="margin-top: 1.5rem;">
+            <label class="form-label" for="cash-sender-name">Nama Penyetor Uang</label>
+            <input type="text" id="cash-sender-name" class="form-input" placeholder="Masukkan nama warga yang menyetor...">
+          </div>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('modal-qris')">Batal</button>
+        <button class="btn btn-primary" id="btn-submit-payment" onclick="submitWargaPayment()">
+          <i data-lucide="check"></i> Laporkan Pembayaran
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 2: VIEW TRANSFER RECEIPT PROOF -->
+  <div class="modal-overlay" id="modal-view-receipt">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Detail Bukti Transfer Anda</h3>
+        <button class="modal-close-btn" onclick="closeModal('modal-view-receipt')">&times;</button>
+      </div>
+      <div class="modal-body" style="text-align: center;">
+        <div style="background-color: #f8fafc; padding: 1rem; border-radius: var(--radius-md); text-align: left; margin-bottom: 1rem;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 0.4rem;">
+            <strong>Nama Pengirim:</strong> <span id="receipt-modal-name">-</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 0.4rem;">
+            <strong>Bulan Tagihan:</strong> <span id="receipt-modal-month">-</span>
+          </div>
+          <div style="display: flex; justify-content: space-between;">
+            <strong>Nominal Bayar:</strong> <span id="receipt-modal-amount" style="color: var(--success); font-weight: 700;">-</span>
+          </div>
+        </div>
+        
+        <p style="font-weight: 600; text-align: left; margin-bottom: 0.5rem; color: var(--text-secondary);">Foto Bukti Transfer:</p>
+        <img id="receipt-modal-image" src="" alt="Bukti Transfer Warga" style="max-width: 100%; max-height: 250px; object-fit: contain; border-radius: var(--radius-sm); border: 2px solid var(--border-color); display: block; margin: 0 auto;">
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('modal-view-receipt')">Tutup</button>
+        <!-- The resident view does not contain a button to approve their own receipt, so receipt-modal-acc-btn is omitted or hidden in JS -->
+        <button class="btn btn-primary" id="receipt-modal-acc-btn" style="display: none;"></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- App Core Logic -->
+  <script src="app.js?v=3"></script>
+</body>
+</html>
