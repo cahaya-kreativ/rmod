@@ -554,6 +554,26 @@ function stopSiren() {
   }
 }
 
+function enableAudioContext() {
+  try {
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+    // Play a brief silent sound to fully unlock iOS/Android Audio Context restrictions
+    const buffer = audioCtx.createBuffer(1, 1, 22050);
+    const source = audioCtx.createBufferSource();
+    source.buffer = buffer;
+    source.connect(audioCtx.destination);
+    source.start(0);
+  } catch (err) {}
+}
+
+window.addEventListener('click', enableAudioContext);
+window.addEventListener('touchstart', enableAudioContext);
+
 // --- CRUD CITIZEN DATABASE ---
 function renderAdminWargaTable() {
   const container = document.getElementById('admin-warga-table-body');

@@ -1192,27 +1192,69 @@ body.modal-open {
 
 /* ==================== MEDIA QUERIES FOR SEAMLESS MOBILE RESPONSIVENESS ==================== */
 
+@media (max-width: 1023px) {
+  /* Stacks sidebar (profile, panic button) UNDER the main dashboard content on tablets/phones.
+     This ensures citizens see their billing tabs and active content first without scrolling 900px! */
+  .warga-grid {
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 1.5rem;
+  }
+  .sidebar-area {
+    margin-top: 1rem;
+  }
+}
+
 @media (max-width: 768px) {
   /* Reduce outer padding of the dashboard on tablets/phones to maximize screen space */
   .dashboard-wrapper {
     padding: 0.85rem;
   }
+  
+  /* Make cards more compact and sleek on smaller screens */
+  .card {
+    padding: 1.25rem;
+    margin-bottom: 1.25rem;
+    border-radius: var(--radius-md);
+  }
+  .card-title {
+    font-size: 1.15rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    gap: 0.5rem;
+  }
+  .card-title svg {
+    width: 20px;
+    height: 20px;
+  }
 }
 
 @media (max-width: 576px) {
-  /* Streamline header layout on mobile screens */
+  /* Streamline header layout on mobile screens, centering content beautifully when wrapped */
   header {
     padding: 0.75rem 1rem;
   }
+  .header-content {
+    justify-content: center;
+    text-align: center;
+    gap: 0.75rem;
+  }
+  .logo-area {
+    justify-content: center;
+    width: 100%;
+  }
+  .header-actions {
+    justify-content: center;
+    width: 100%;
+    gap: 0.75rem;
+  }
+  
   .logo-text h1 {
     font-size: 1.3rem;
   }
   .logo-text p {
     font-size: 0.7rem;
     letter-spacing: 0.5px;
-  }
-  .header-actions {
-    gap: 0.75rem;
   }
   
   /* Compact User Badge styling for clean visual flow */
@@ -1227,6 +1269,74 @@ body.modal-open {
     width: 28px;
     height: 28px;
     font-size: 0.9rem;
+  }
+  
+  /* Stats Grid: Transition to an extremely premium 2-column grid layout */
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+  }
+  
+  /* Smart CSS: If there's an odd number of stat cards (like the 3 cards in warga iuran), 
+     make the first card span 2 columns fully for absolute symmetry! */
+  .stats-grid > *:nth-last-child(odd):first-child {
+    grid-column: span 2;
+  }
+  
+  .stat-card {
+    padding: 0.85rem;
+    gap: 0.75rem;
+    border-radius: var(--radius-md);
+  }
+  .stat-icon {
+    width: 44px;
+    height: 44px;
+    font-size: 1.25rem;
+  }
+  .stat-icon svg {
+    width: 20px;
+    height: 20px;
+  }
+  .stat-info h4 {
+    font-size: 0.75rem;
+    margin-bottom: 0.15rem;
+  }
+  
+  /* Responsive Stats Nominal Sizing: Prevents text overflow / messy layout in mobile cards */
+  .stat-value {
+    font-size: 1.15rem;
+    white-space: nowrap;
+  }
+  
+  /* The first card spans 2 columns, so it has more horizontal space to display a larger nominal */
+  .stats-grid > *:nth-last-child(odd):first-child .stat-value {
+    font-size: 1.45rem;
+  }
+  
+  /* Make horizontal tab buttons compact and neat on mobile screens */
+  .tab-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.95rem;
+    min-height: 40px;
+    gap: 0.35rem;
+  }
+  .tab-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+  
+  /* Enable direct horizontal swiping on the announcement carousel track */
+  .carousel-track {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .carousel-track::-webkit-scrollbar {
+    display: none;
+  }
+  .carousel-btn {
+    display: none !important; /* Hide overlay arrow buttons on mobile since swipe touch is active */
   }
   
   /* Make emergency alarm bar neat on mobile */
@@ -1289,5 +1399,36 @@ body.modal-open {
   .form-input {
     font-size: 0.95rem;
     padding: 0.7rem 0.85rem;
+  }
+  
+  /* QRIS Static Illustration Frame Sizer: Centered and constrained, 
+     preventing enormous stretched QR codes on mobile */
+  .qris-card-wrapper {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+  .qris-card {
+    max-width: 230px;
+    width: 100%;
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 390px) {
+  /* Extra tiny screens optimization to ensure absolutely no overflowing currency text */
+  .stat-value {
+    font-size: 1rem !important;
+  }
+  .stats-grid > *:nth-last-child(odd):first-child .stat-value {
+    font-size: 1.25rem !important;
+  }
+  .stat-card {
+    padding: 0.65rem;
+    gap: 0.5rem;
+  }
+  .stat-icon {
+    width: 36px;
+    height: 36px;
   }
 }

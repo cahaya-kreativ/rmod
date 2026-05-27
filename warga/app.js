@@ -708,17 +708,16 @@ function setupLetterHandler() {
       docInput.addEventListener('change', (e) => {
         const file = e.target.files[0];
         if (file) {
-          const reader = new FileReader();
-          reader.onload = function(evt) {
-            uploadedDocBase64 = evt.target.result;
+          showToast("Membaca & mengompresi berkas dokumen...", "info");
+          compressImage(file, 480, 480, (compressedDataUrl) => {
+            uploadedDocBase64 = compressedDataUrl;
             if (docPreview) {
-              docPreview.src = evt.target.result;
+              docPreview.src = compressedDataUrl;
               docPreview.style.display = 'block';
             }
-            if (docLabel) docLabel.innerText = `Berkas Terbaca: ${file.name}`;
-            showToast("Foto dokumen berhasil dimuat!", 'success');
-          };
-          reader.readAsDataURL(file);
+            if (docLabel) docLabel.innerText = `Gambar Kompresi Siap: ${file.name}`;
+            showToast("Foto dokumen berhasil dikompresi & dimuat!", 'success');
+          });
         }
       });
     }
@@ -792,24 +791,56 @@ function togglePayMethod(method) {
   }
 }
 
+// Universal client-side image compression to prevent Firestore 1MB limits and mobile browser crashes
+function compressImage(file, maxW, maxH, callback) {
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const img = new Image();
+    img.onload = function() {
+      const canvas = document.createElement('canvas');
+      let width = img.width;
+      let height = img.height;
+      
+      if (width > height) {
+        if (width > maxW) {
+          height = Math.round((height * maxW) / width);
+          width = maxW;
+        }
+      } else {
+        if (height > maxH) {
+          width = Math.round((width * maxH) / height);
+          height = maxH;
+        }
+      }
+      
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+      
+      // JPEG format with 0.7 quality produces ultra-small (15-30KB) high contrast compressed images
+      const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
+      callback(compressedDataUrl);
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
 function handleReceiptUpload(event) {
   const file = event.target.files[0];
   if (file) {
-    if (file.size > 2 * 1024 * 1024) {
-      showToast("Ukuran berkas terlalu besar! Maksimal 2MB.", 'danger');
-      return;
-    }
+    // Show a loading/compressing toast for smooth UX
+    showToast("Membaca & mengompresi gambar bukti...", "info");
     
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      uploadedReceiptBase64 = e.target.result;
+    compressImage(file, 480, 480, (compressedDataUrl) => {
+      uploadedReceiptBase64 = compressedDataUrl;
       const preview = document.getElementById('qris-receipt-preview');
-      preview.src = e.target.result;
+      preview.src = compressedDataUrl;
       preview.style.display = 'block';
-      document.getElementById('upload-label-text').innerText = `Gambar Siap: ${file.name}`;
-      showToast("Gambar bukti transfer berhasil dibaca!", 'success');
-    };
-    reader.readAsDataURL(file);
+      document.getElementById('upload-label-text').innerText = `Gambar Kompresi Siap: ${file.name}`;
+      showToast("Bukti transfer berhasil dikompresi & dimuat!", 'success');
+    });
   }
 }
 
@@ -933,16 +964,15 @@ function setupPanicButtonHandler() {
     panicCamInput.addEventListener('change', (e) => {
       const file = e.target.files[0];
       if (file) {
-        const reader = new FileReader();
-        reader.onload = function(evt) {
+        showToast("Membaca & mengompresi foto darurat...", "info");
+        compressImage(file, 480, 480, (compressedDataUrl) => {
           if (panicCamPreview) {
-            panicCamPreview.src = evt.target.result;
+            panicCamPreview.src = compressedDataUrl;
             panicCamPreview.style.display = 'block';
           }
-          if (panicCamLabel) panicCamLabel.innerText = `Foto Siap: ${file.name}`;
-          showToast("Foto keadaan darurat berhasil ditambahkan!", 'success');
-        };
-        reader.readAsDataURL(file);
+          if (panicCamLabel) panicCamLabel.innerText = `Gambar Kompresi Siap: ${file.name}`;
+          showToast("Foto keadaan darurat berhasil dikompresi & dimuat!", 'success');
+        });
       }
     });
   }
@@ -1102,6 +1132,12 @@ function enableAudioContext() {
     if (audioCtx.state === 'suspended') {
       audioCtx.resume();
     }
+    // Play a brief silent sound to fully unlock iOS/Android Audio Context restrictions
+    const buffer = audioCtx.createBuffer(1, 1, 22050);
+    const source = audioCtx.createBufferSource();
+    source.buffer = buffer;
+    source.connect(audioCtx.destination);
+    source.start(0);
   } catch (err) {}
 }
 
