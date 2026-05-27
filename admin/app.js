@@ -65,6 +65,7 @@ let state = {};
 let currentUser = null; // Stores { role: 'admin' }
 let currentAdminTab = 'warga';
 let kasChartInstance = null;
+let firebaseUnsubscribe = null;
 
 // Audio Panic Siren Context
 let audioCtx = null;
@@ -140,6 +141,24 @@ function initApp() {
   }
   if (needsSave) saveState();
   
+  // Setup real-time Firebase synchronization if configured
+  if (typeof listenToFirebaseState === 'function') {
+    firebaseUnsubscribe = listenToFirebaseState((cloudState) => {
+      if (cloudState) {
+        state = cloudState;
+        localStorage.setItem('rmod_state', JSON.stringify(state));
+        
+        // Reactively re-render UI if admin is logged in
+        if (currentUser && currentUser.role === 'admin') {
+          renderAdminPortal();
+        }
+      } else {
+        // Firebase is empty, seed it with our local state
+        saveState();
+      }
+    });
+  }
+  
   // Restore session if exists
   const savedSession = localStorage.getItem('rmod_session');
   if (savedSession) {
@@ -173,6 +192,9 @@ function initApp() {
 
 function saveState() {
   localStorage.setItem('rmod_state', JSON.stringify(state));
+  if (typeof uploadStateToFirebase === 'function') {
+    uploadStateToFirebase(state);
+  }
 }
 
 // --- MODAL UTILITIES ---
