@@ -586,6 +586,12 @@ header {
   padding-bottom: 0.5rem;
   overflow-x: auto;
   white-space: nowrap;
+  -webkit-overflow-scrolling: touch; /* Smooth inertial scrolling on iOS devices */
+  scrollbar-width: none; /* Hide scrollbar Firefox */
+}
+
+.tabs-nav::-webkit-scrollbar {
+  display: none; /* Hide scrollbar Chrome/Safari/Opera */
 }
 
 .tab-btn {
@@ -709,10 +715,28 @@ header {
   border: 2px solid var(--border-color);
   border-radius: var(--radius-md);
   margin-top: 1rem;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Custom scrollbar for accessible horizontal scrolling tables */
+.table-container::-webkit-scrollbar {
+  height: 6px;
+}
+.table-container::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+.table-container::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+.table-container::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
 
 .custom-table {
   width: 100%;
+  min-width: 800px; /* Crucial: Prevents table squishing on mobile screens */
   border-collapse: collapse;
   text-align: left;
 }
@@ -1165,3 +1189,105 @@ body.modal-open {
 
 .cash-log-amount.in { color: var(--success); }
 .cash-log-amount.out { color: var(--danger); }
+
+/* ==================== MEDIA QUERIES FOR SEAMLESS MOBILE RESPONSIVENESS ==================== */
+
+@media (max-width: 768px) {
+  /* Reduce outer padding of the dashboard on tablets/phones to maximize screen space */
+  .dashboard-wrapper {
+    padding: 0.85rem;
+  }
+}
+
+@media (max-width: 576px) {
+  /* Streamline header layout on mobile screens */
+  header {
+    padding: 0.75rem 1rem;
+  }
+  .logo-text h1 {
+    font-size: 1.3rem;
+  }
+  .logo-text p {
+    font-size: 0.7rem;
+    letter-spacing: 0.5px;
+  }
+  .header-actions {
+    gap: 0.75rem;
+  }
+  
+  /* Compact User Badge styling for clean visual flow */
+  .user-badge {
+    padding: 0.35rem 0.6rem;
+    gap: 0.4rem;
+  }
+  .user-badge-name {
+    display: none; /* Hide user name on extremely small screens (the colored avatar is enough and keeps header clean) */
+  }
+  .user-badge-avatar {
+    width: 28px;
+    height: 28px;
+    font-size: 0.9rem;
+  }
+  
+  /* Make emergency alarm bar neat on mobile */
+  .emergency-alert-bar {
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+  }
+  .emergency-alert-info {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .emergency-alert-text h3 {
+    font-size: 1.1rem;
+  }
+  .emergency-alert-text p {
+    font-size: 0.95rem;
+  }
+  
+  /* Reduce modal margins & maximize width on tiny devices */
+  .modal-overlay {
+    padding: 0.75rem 0.5rem;
+  }
+  .modal-content {
+    padding: 1rem;
+    max-height: 95vh;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Ensure login box fits beautifully on small viewports */
+  .login-card {
+    padding: 1.75rem 1.25rem;
+  }
+  .login-header {
+    margin-bottom: 1.5rem;
+  }
+  .login-header .app-logo-large {
+    width: 56px;
+    height: 56px;
+    font-size: 1.8rem;
+    margin-bottom: 0.75rem;
+  }
+  .login-header h2 {
+    font-size: 1.5rem;
+  }
+  .login-header p {
+    font-size: 0.95rem;
+  }
+  
+  /* Form sizer adjustments */
+  .form-group {
+    margin-bottom: 1.25rem;
+  }
+  .form-label {
+    font-size: 0.95rem;
+  }
+  .form-input {
+    font-size: 0.95rem;
+    padding: 0.7rem 0.85rem;
+  }
+}
